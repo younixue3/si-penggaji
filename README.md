@@ -1,6 +1,6 @@
 # Si Penggaji
 
-Sistem manajemen penggajian yang dibangun dengan Django dan Django-Tailwind.
+Si Penggaji adalah aplikasi penggajian yang awalnya dibuat untuk membantu pasangan saya mengelola gaji dengan lebih mudah dan efisien. Ke depannya, aplikasi ini akan terus dikembangkan agar dapat beradaptasi sesuai kebutuhan pengguna dan menjadi solusi andal dalam pengelolaan gaji secara profesional.
 
 ## Fitur
 
