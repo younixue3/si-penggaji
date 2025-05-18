@@ -85,30 +85,7 @@ Sistem manajemen penggajian yang dibangun dengan Django dan Django-Tailwind.
    ```
 3. Akses aplikasi di browser: http://127.0.0.1:8000/
 4. Akses panel admin di: http://127.0.0.1:8000/admin/
-## Struktur Proyek
-```
-si-penggaji/
-├── manage.py
-├── requirements.txt
-├── si_penggaji/              # 
-Konfigurasi proyek utama
-│   ├── __init__.py
-│   ├── settings.py
-│   ├── urls.py
-│   └── wsgi.py
-├── theme/                    # 
-Konfigurasi Tailwind CSS
-│   ├── static_src/
-│   │   └── tailwind.config.js
-├── karyawan/                 # 
-Aplikasi manajemen karyawan
-├── penggajian/               # 
-Aplikasi penggajian
-├── kehadiran/                # 
-Aplikasi kehadiran
-└── templates/                # 
-Template HTML
-```
+
 ## Deployment
 ### Persiapan untuk Produksi
 1. Sesuaikan pengaturan produksi di settings.py :
