@@ -60,12 +60,12 @@
     class="bg-gray-50 font-serif leading-normal tracking-normal min-h-screen flex flex-col"
   >
     <!-- Header -->
-    {% include "header.html" %}
+    {% include "layout/header.html" %}
 
     <!-- Main Content -->
     <main class="flex-grow">{% block content %} {% endblock content %}</main>
 
     <!-- Footer -->
-    {% include "footer.html" %} {% block extra_js %}{% endblock %}
+    {% include "layout/footer.html" %} {% block extra_js %}{% endblock %}
   </body>
 </html>

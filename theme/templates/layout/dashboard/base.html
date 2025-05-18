@@ -70,12 +70,11 @@
             <!-- Header -->
             {% include "layout/dashboard/header.html" %}
             {% block content %}{% endblock content %}
+            <!-- Footer -->
+            {% include "layout/dashboard/footer.html" %}
           </div>
         </main>
       </div>
-
-      <!-- Footer -->
-      {% include "layout/dashboard/footer.html" %}
     </div>
 
     {% block extra_js %}{% endblock %}

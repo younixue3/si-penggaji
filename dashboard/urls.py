@@ -4,5 +4,5 @@ from . import views
 
 urlpatterns = [
     path('', views.dashboard_view, name='dashboard_page'),
-    path('penggaji/', include('penggaji.urls')),
+    path('penggajian/', include('penggaji.urls')),
 ]

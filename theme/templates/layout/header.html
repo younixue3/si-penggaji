@@ -18,31 +18,12 @@
 
       <!-- User Menu -->
       <div class="flex items-center space-x-4">
-        {% comment %} {% if user.is_authenticated %} {% endcomment %}
-        <div class="relative">
-          <button
-            class="flex items-center space-x-2 text-pink-600 hover:text-pink-900"
-          >
-            <span>{{ user.username }}</span>
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </button>
-        </div>
+        {% if user.is_authenticated %}
+        <a href="{% url 'dashboard_page' %}" class="text-pink-600 hover:text-pink-900">Dashboard</a>
         {% comment %} <a href="{% url 'logout' %}" class="text-pink-600 hover:text-pink-900">Logout</a> {% endcomment %}
-        {% comment %} {% else %} {% endcomment %}
+        {% else %}
         <a href="{% url 'login_page' %}" class="text-pink-600 hover:text-pink-900">Login</a>
-        {% comment %} {% endif %} {% endcomment %}
+        {% endif %}
       </div>
 
       <!-- Mobile Menu Button -->
