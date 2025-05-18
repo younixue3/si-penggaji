@@ -112,8 +112,6 @@ Sistem manajemen penggajian yang dibangun dengan Django dan Django-Tailwind.
 3. Commit perubahan Anda ( git commit -m 'Menambahkan fitur baru' )
 4. Push ke branch ( git push origin fitur-baru )
 5. Buat Pull Request
-## Lisensi
-Proyek ini dilisensikan di bawah MIT License .
 
 ## Kontak
-Untuk pertanyaan atau dukungan, silakan hubungi email@example.com .
+Untuk pertanyaan atau dukungan, silakan hubungi bussiness.needs.rctka@gmail.com .
