@@ -1,0 +1,208 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}SI-Penggaji - Sistem Informasi Penggajian{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<header class="bg-gradient-to-r from-pink-100 to-purple-100 py-24">
+  <div class="container mx-auto px-6">
+    <div class="flex flex-wrap items-center justify-between">
+      <div class="w-full lg:w-1/2 pr-8">
+        <h1 class="text-6xl font-extrabold leading-tight mb-6 text-purple-800 animate-fade-in">
+          Kelola Penggajian Karyawan dengan Mudah
+        </h1>
+        <p class="text-2xl text-purple-600 mb-10 leading-relaxed">
+          SI-Penggaji membantu Anda mengelola sistem penggajian karyawan secara
+          efisien dan akurat dengan teknologi terkini.
+        </p>
+        <a
+          href="#features"
+          class="inline-block bg-gradient-to-r from-pink-500 to-purple-500 text-white px-10 py-4 rounded-xl text-lg font-semibold hover:from-pink-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
+        >
+          Mulai Sekarang
+        </a>
+      </div>
+      <div class="w-full lg:w-1/2 mt-12 lg:mt-0">
+        <img
+          src="/static/images/hero-image.jpg"
+          alt="SI-Penggaji Dashboard Preview"
+          class="rounded-3xl shadow-2xl w-full transform hover:scale-105 transition-all duration-500 hover:shadow-3xl"
+          loading="lazy"
+        />
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Features Section -->
+<section id="features" class="py-24 bg-gradient-to-b from-white to-pink-50">
+  <div class="container mx-auto px-6">
+    <h2 class="text-5xl font-bold text-center mb-20 text-purple-800">
+      Fitur Unggulan
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+      <div
+        class="bg-white rounded-3xl shadow-xl p-10 hover:shadow-2xl transition-all duration-300 border-t-4 border-pink-400 group hover:-translate-y-2"
+      >
+        <div class="text-center">
+          <div class="inline-block p-4 bg-pink-100 rounded-2xl mb-8 group-hover:bg-pink-200 transition-colors duration-300">
+            <i class="fas fa-calculator text-5xl text-pink-500"></i>
+          </div>
+          <h3 class="text-2xl font-bold mb-6 text-purple-800">
+            Perhitungan Otomatis
+          </h3>
+          <p class="text-lg text-purple-600 leading-relaxed">
+            Hitung gaji karyawan secara otomatis dengan mempertimbangkan
+            berbagai komponen penggajian modern.
+          </p>
+        </div>
+      </div>
+      <div
+        class="bg-white rounded-3xl shadow-xl p-10 hover:shadow-2xl transition-all duration-300 border-t-4 border-purple-400 group hover:-translate-y-2"
+      >
+        <div class="text-center">
+          <div class="inline-block p-4 bg-purple-100 rounded-2xl mb-8 group-hover:bg-purple-200 transition-colors duration-300">
+            <i class="fas fa-file-invoice text-5xl text-purple-500"></i>
+          </div>
+          <h3 class="text-2xl font-bold mb-6 text-purple-800">
+            Laporan Digital
+          </h3>
+          <p class="text-lg text-purple-600 leading-relaxed">
+            Generate laporan penggajian digital yang komprehensif dengan format ekspor beragam.
+          </p>
+        </div>
+      </div>
+      <div
+        class="bg-white rounded-3xl shadow-xl p-10 hover:shadow-2xl transition-all duration-300 border-t-4 border-pink-400 group hover:-translate-y-2"
+      >
+        <div class="text-center">
+          <div class="inline-block p-4 bg-pink-100 rounded-2xl mb-8 group-hover:bg-pink-200 transition-colors duration-300">
+            <i class="fas fa-shield-alt text-5xl text-pink-500"></i>
+          </div>
+          <h3 class="text-2xl font-bold mb-6 text-purple-800">
+            Keamanan Data
+          </h3>
+          <p class="text-lg text-purple-600 leading-relaxed">
+            Proteksi data penggajian dengan sistem enkripsi modern dan standar keamanan tinggi.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- About Section -->
+<section id="about" class="py-24 bg-gradient-to-r from-purple-100 to-pink-100">
+  <div class="container mx-auto px-6">
+    <div class="flex flex-wrap items-center justify-between">
+      <div class="w-full lg:w-1/2 pr-8">
+        <h2 class="text-5xl font-bold mb-10 text-purple-800">
+          Tentang SI-Penggaji
+        </h2>
+        <p class="text-xl text-purple-600 mb-8 leading-relaxed">
+          SI-Penggaji adalah solusi modern untuk manajemen penggajian karyawan.
+          Platform kami menghadirkan inovasi terdepan untuk memudahkan proses penggajian
+          dan administrasi SDM secara menyeluruh.
+        </p>
+        <ul class="space-y-6">
+          <li class="flex items-center text-lg">
+            <div class="bg-pink-100 p-2 rounded-lg mr-4">
+              <i class="fas fa-check text-pink-500"></i>
+            </div>
+            <span class="text-purple-700 font-medium">Interface yang intuitif dan mudah digunakan</span>
+          </li>
+          <li class="flex items-center text-lg">
+            <div class="bg-pink-100 p-2 rounded-lg mr-4">
+              <i class="fas fa-check text-pink-500"></i>
+            </div>
+            <span class="text-purple-700 font-medium">Terintegrasi penuh dengan sistem absensi</span>
+          </li>
+          <li class="flex items-center text-lg">
+            <div class="bg-pink-100 p-2 rounded-lg mr-4">
+              <i class="fas fa-check text-pink-500"></i>
+            </div>
+            <span class="text-purple-700 font-medium">Dukungan teknis responsif 24/7</span>
+          </li>
+        </ul>
+      </div>
+      <div class="w-full lg:w-1/2 mt-12 lg:mt-0">
+        <img
+          src="/static/images/about-image.jpg"
+          alt="SI-Penggaji Team"
+          class="rounded-3xl shadow-2xl w-full transform hover:scale-105 transition-all duration-500"
+          loading="lazy"
+        />
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Contact Section -->
+<section id="contact" class="py-24 bg-gradient-to-b from-pink-50 to-white">
+  <div class="container mx-auto px-6">
+    <h2 class="text-5xl font-bold text-center mb-20 text-purple-800">
+      Hubungi Kami
+    </h2>
+    <div class="max-w-4xl mx-auto">
+      <div class="bg-white rounded-3xl shadow-2xl p-12 border border-pink-100">
+        <form class="space-y-8">
+          <div>
+            <label
+              for="name"
+              class="block text-purple-700 text-lg font-semibold mb-3"
+            >
+              Nama Lengkap
+            </label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              required
+              placeholder="Masukkan nama lengkap Anda"
+              class="w-full px-4 py-3 border-2 border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
+            />
+          </div>
+          <div>
+            <label
+              for="email"
+              class="block text-purple-700 text-lg font-semibold mb-3"
+            >
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              placeholder="nama@perusahaan.com"
+              class="w-full px-4 py-3 border-2 border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
+            />
+          </div>
+          <div>
+            <label
+              for="message"
+              class="block text-purple-700 text-lg font-semibold mb-3"
+            >
+              Pesan
+            </label>
+            <textarea
+              id="message"
+              name="message"
+              rows="5"
+              required
+              placeholder="Tuliskan pesan Anda di sini..."
+              class="w-full px-4 py-3 border-2 border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
+            ></textarea>
+          </div>
+          <button
+            type="submit"
+            class="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:from-pink-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
+          >
+            Kirim Pesan
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

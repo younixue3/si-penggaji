@@ -1,0 +1,145 @@
+{% extends 'layout/dashboard/base.html' %}
+
+{% block title %}SI-Penggaji - Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-6 py-8">
+  <!-- Summary Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-purple-500">
+      <div class="flex items-center">
+        <div class="p-3 bg-purple-100 rounded-lg">
+          <i class="fas fa-users text-2xl text-purple-500"></i>
+        </div>
+        <div class="ml-4">
+          <h3 class="text-gray-500 text-sm">Total Karyawan</h3>
+          <p class="text-2xl font-bold text-gray-800">{{ total_employees }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-pink-500">
+      <div class="flex items-center">
+        <div class="p-3 bg-pink-100 rounded-lg">
+          <i class="fas fa-money-bill-wave text-2xl text-pink-500"></i>
+        </div>
+        <div class="ml-4">
+          <h3 class="text-gray-500 text-sm">Total Penggajian</h3>
+          <p class="text-2xl font-bold text-gray-800">Rp {{ total_salary|floatformat:0 }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-purple-500">
+      <div class="flex items-center">
+        <div class="p-3 bg-purple-100 rounded-lg">
+          <i class="fas fa-file-invoice-dollar text-2xl text-purple-500"></i>
+        </div>
+        <div class="ml-4">
+          <h3 class="text-gray-500 text-sm">Pembayaran Bulan Ini</h3>
+          <p class="text-2xl font-bold text-gray-800">{{ paid_employees_ratio }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Section -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    <!-- Monthly Salary Chart -->
+    <div class="bg-white p-6 rounded-xl shadow-md">
+      <h3 class="text-lg font-semibold mb-4 text-gray-800">Tren Penggajian 6 Bulan Terakhir</h3>
+      <canvas id="monthlySalaryChart"></canvas>
+    </div>
+
+    <!-- Department Distribution -->
+    <div class="bg-white p-6 rounded-xl shadow-md">
+      <h3 class="text-lg font-semibold mb-4 text-gray-800">Distribusi Karyawan per Departemen</h3>
+      <canvas id="departmentChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Top Paid Departments -->
+  <div class="bg-white rounded-xl shadow-md p-6">
+    <h3 class="text-lg font-semibold mb-4 text-gray-800">Departemen dengan Rata-rata Gaji Tertinggi</h3>
+    <div class="overflow-x-auto">
+      <table class="min-w-full">
+        <thead>
+          <tr class="bg-gray-50">
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Departemen</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rata-rata Gaji</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          {% for dept in top_paid_departments %}
+          <tr>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ dept.name }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">Rp {{ dept.average_salary|floatformat:0 }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // Monthly Salary Chart
+  const monthlyData = {{ monthly_salary_data|safe }};
+  new Chart(document.getElementById('monthlySalaryChart'), {
+    type: 'line',
+    data: {
+      labels: monthlyData.map(d => d.payment_date__month),
+      datasets: [{
+        label: 'Total Gaji',
+        data: monthlyData.map(d => d.amount),
+        borderColor: '#8B5CF6',
+        tension: 0.3,
+        fill: false
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: function(value) {
+              return 'Rp ' + value.toLocaleString('id-ID');
+            }
+          }
+        }
+      }
+    }
+  });
+
+  // Department Distribution Chart
+  const deptData = {{ department_distribution|safe }};
+  new Chart(document.getElementById('departmentChart'), {
+    type: 'doughnut',
+    data: {
+      labels: deptData.map(d => d.name),
+      datasets: [{
+        data: deptData.map(d => d.count),
+        backgroundColor: [
+          '#8B5CF6',
+          '#EC4899', 
+          '#3B82F6',
+          '#10B981',
+          '#F59E0B'
+        ]
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'bottom'
+        }
+      }
+    }
+  });
+</script>
+{% endblock %}
+{% endblock %}

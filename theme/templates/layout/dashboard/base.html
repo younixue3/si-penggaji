@@ -1,0 +1,83 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <meta
+      name="description"
+      content="{% block meta_description %}A modern Django application with Tailwind CSS{% endblock %}"
+    />
+    <meta
+      name="keywords"
+      content="{% block meta_keywords %}django, tailwind, css, web application{% endblock %}"
+    />
+    <meta
+      name="author"
+      content="{% block meta_author %}Your Name{% endblock %}"
+    />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="{{ request.build_absolute_uri }}" />
+    <meta property="og:title" content="{% block og_title %}{% endblock %}" />
+    <meta
+      property="og:description"
+      content="{% block og_description %}{% endblock %}"
+    />
+    <meta property="og:image" content="{% block og_image %}{% endblock %}" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="{{ request.build_absolute_uri }}" />
+    <meta
+      property="twitter:title"
+      content="{% block twitter_title %}{% endblock %}"
+    />
+    <meta
+      property="twitter:description"
+      content="{% block twitter_description %}{% endblock %}"
+    />
+    <meta
+      property="twitter:image"
+      content="{% block twitter_image %}{% endblock %}"
+    />
+
+    <title>{% block title %}Django Application{% endblock %} | Site Name</title>
+
+    <!-- Favicon -->
+    <link
+      rel="icon"
+      type="image/png"
+      href="{% static 'images/favicon.png' %}"
+    />
+
+    {% tailwind_css %}
+    {% block extra_css %}{% endblock %}
+  </head>
+
+  <body class="bg-gray-100 font-sans antialiased">
+    <div class="min-h-screen bg-gray-100">
+
+      <div class="flex overflow-hidden">
+        <!-- Sidebar -->
+        {% include "layout/dashboard/sidebar.html" %}
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
+          <div class="container mx-auto">
+            <!-- Header -->
+            {% include "layout/dashboard/header.html" %}
+            {% block content %}{% endblock content %}
+          </div>
+        </main>
+      </div>
+
+      <!-- Footer -->
+      {% include "layout/dashboard/footer.html" %}
+    </div>
+
+    {% block extra_js %}{% endblock %}
+  </body>
+</html>

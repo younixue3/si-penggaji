@@ -1,0 +1,111 @@
+{% extends 'layout/dashboard/base.html' %}
+{% block title %}SI-Penggaji - Data Penggajian{% endblock %}
+{% block content %}
+<div class="container mx-auto px-6 py-8">
+  <div class="bg-white rounded-xl shadow-md">
+    <div class="flex justify-between items-center p-6 border-b">
+      <h3 class="text-lg font-semibold text-gray-800">Data Penggajian</h3>
+      <div class="flex space-x-2">
+        <form class="flex" method="GET">
+          <input type="text" name="search" placeholder="Cari..." value="{{ request.GET.search }}"
+            class="px-4 py-2 border rounded-l focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <button type="submit"
+            class="px-4 py-2 bg-blue-500 text-white rounded-r hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <i class="fas fa-search"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full table-auto">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="p-4 text-left font-medium text-gray-600">No</th>
+            <th class="p-4 text-left font-medium text-gray-600">Nama Karyawan</th>
+            <th class="p-4 text-left font-medium text-gray-600">Departemen</th>
+            <th class="p-4 text-left font-medium text-gray-600">Gaji Pokok</th>
+            <th class="p-4 text-left font-medium text-gray-600">Tunjangan</th>
+            <th class="p-4 text-left font-medium text-gray-600">Total Gaji</th>
+            <th class="p-4 text-left font-medium text-gray-600">Tanggal</th>
+            <th class="p-4 text-left font-medium text-gray-600">Status</th>
+            <th class="p-4 text-left font-medium text-gray-600">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for salary in salaries %}
+          <tr class="border-b hover:bg-gray-50">
+            <td class="p-4">{{ forloop.counter }}</td>
+            <td class="p-4">{{ salary.employee.name }}</td>
+            <td class="p-4">{{ salary.employee.department }}</td>
+            <td class="p-4">Rp {{ salary.base_salary|floatformat:0 }}</td>
+            <td class="p-4">Rp {{ salary.allowance|floatformat:0 }}</td>
+            <td class="p-4">Rp {{ salary.total_salary|floatformat:0 }}</td>
+            <td class="p-4">{{ salary.date|date:"d/m/Y" }}</td>
+            <td class="p-4">
+              {% if salary.is_paid %}
+              <span class="px-3 py-1 text-sm font-medium text-green-700 bg-green-100 rounded-full">Dibayar</span>
+              {% else %}
+              <span class="px-3 py-1 text-sm font-medium text-red-700 bg-red-100 rounded-full">Belum Dibayar</span>
+              {% endif %}
+            </td>
+            <td class="p-4">
+              <div class="flex items-center space-x-3">
+                <a href="{% url 'salary_detail' salary.id %}" class="text-blue-600 hover:text-blue-800">
+                  <i class="fas fa-eye"></i>
+                </a>
+                <a href="{% url 'salary_edit' salary.id %}" class="text-yellow-600 hover:text-yellow-800">
+                  <i class="fas fa-edit"></i>
+                </a>
+                <button onclick="deleteSalary({{ salary.id }})" class="text-red-600 hover:text-red-800">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="9" class="p-4 text-center text-gray-500">Tidak ada data penggajian</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if salaries.has_other_pages %}
+    <div class="flex items-center justify-between px-6 py-4 bg-gray-50">
+      <p class="text-sm text-gray-600">
+        Menampilkan {{ salaries.start_index }} - {{ salaries.end_index }} dari {{ salaries.paginator.count }} data
+      </p>
+      
+      <div class="flex items-center space-x-2">
+        {% if salaries.has_previous %}
+        <a href="?page={{ salaries.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" 
+           class="px-4 py-2 text-sm bg-white border rounded-md hover:bg-gray-50">
+          Previous
+        </a>
+        {% endif %}
+
+        {% for num in salaries.paginator.page_range %}
+          {% if salaries.number == num %}
+          <span class="px-4 py-2 text-sm text-white bg-blue-500 rounded-md">{{ num }}</span>
+          {% else %}
+          <a href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+             class="px-4 py-2 text-sm bg-white border rounded-md hover:bg-gray-50">
+            {{ num }}
+          </a>
+          {% endif %}
+        {% endfor %}
+
+        {% if salaries.has_next %}
+        <a href="?page={{ salaries.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+           class="px-4 py-2 text-sm bg-white border rounded-md hover:bg-gray-50">
+          Next
+        </a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

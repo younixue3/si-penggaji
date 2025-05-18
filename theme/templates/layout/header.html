@@ -1,0 +1,68 @@
+<header class="bg-pink-50 shadow-md">
+  <div class="container mx-auto px-4">
+    <div class="flex justify-between items-center h-16">
+      <!-- Logo/Brand -->
+      <div class="flex items-center">
+        <a href="/" class="text-xl font-bold text-pink-800">SiPenggaji</a>
+      </div>
+
+      <!-- Navigation Menu -->
+      <nav class="hidden md:flex space-x-8">
+        <a href="/" class="text-pink-600 hover:text-pink-900">Home</a>
+        <a href="/employees" class="text-pink-600 hover:text-pink-900"
+          >Employees</a
+        >
+        <a href="/payroll" class="text-pink-600 hover:text-pink-900">Payroll</a>
+        <a href="/reports" class="text-pink-600 hover:text-pink-900">Reports</a>
+      </nav>
+
+      <!-- User Menu -->
+      <div class="flex items-center space-x-4">
+        {% comment %} {% if user.is_authenticated %} {% endcomment %}
+        <div class="relative">
+          <button
+            class="flex items-center space-x-2 text-pink-600 hover:text-pink-900"
+          >
+            <span>{{ user.username }}</span>
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
+        </div>
+        {% comment %} <a href="{% url 'logout' %}" class="text-pink-600 hover:text-pink-900">Logout</a> {% endcomment %}
+        {% comment %} {% else %} {% endcomment %}
+        <a href="{% url 'login_page' %}" class="text-pink-600 hover:text-pink-900">Login</a>
+        {% comment %} {% endif %} {% endcomment %}
+      </div>
+
+      <!-- Mobile Menu Button -->
+      <div class="md:hidden">
+        <button class="text-pink-600 hover:text-pink-900">
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
