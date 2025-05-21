@@ -1,7 +1,7 @@
 <div class="w-64">
-    <aside class="w-64 h-screen bg-gray-900 text-white fixed left-0 top-0 overflow-y-auto">
+    <aside class="w-64 h-screen bg-pink-900 text-white fixed left-0 top-0 overflow-y-auto">
         <!-- Brand Logo -->
-        <a href="{% url 'dashboard_page' %}" class="flex items-center px-6 py-4 border-b border-gray-800">
+        <a href="{% url 'dashboard_page' %}" class="flex items-center px-6 py-4 border-b border-pink-800">
             {% comment %} <img src="{% static 'img/logo.png' %}" alt="Logo" class="w-8 h-8 rounded-full opacity-80"> {% endcomment %}
             <span class="ml-3 text-xl font-light">SI-Penggaji</span>
         </a>
@@ -9,7 +9,7 @@
         <!-- Sidebar -->
         <div class="py-4">
             <!-- Sidebar user panel -->
-            <div class="px-6 pb-4 border-b border-gray-800">
+            <div class="px-6 pb-4 border-b border-pink-800">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         {% comment %} <img src="{% static 'img/user-default.jpg' %}" class="w-10 h-10 rounded-full" alt="User Image"> {% endcomment %}
@@ -25,17 +25,40 @@
                 <ul class="space-y-1">
                     <li>
                         <a href="{% url 'dashboard_page' %}" 
-                           class="flex items-center px-6 py-3 text-sm {% if request.resolver_match.url_name == 'dashboard_page' %}bg-gray-800 text-white{% else %}text-gray-300 hover:bg-gray-800 hover:text-white{% endif %} transition-colors duration-200">
+                           class="flex items-center px-6 py-3 text-sm {% if request.resolver_match.url_name == 'dashboard_page' %}bg-pink-800 text-white{% else %}text-pink-300 hover:bg-pink-800 hover:text-white{% endif %} transition-colors duration-200">
                             <i class="fas fa-tachometer-alt w-5 h-5"></i>
                             <span class="ml-3">Dashboard</span>
                         </a>
                     </li>
-                    <li>
-                        <a href="{% url 'penggajian_read' %}" 
-                           class="flex items-center px-6 py-3 text-sm {% if request.resolver_match.url_name == 'penggajian_read' %}bg-gray-800 text-white{% else %}text-gray-300 hover:bg-gray-800 hover:text-white{% endif %} transition-colors duration-200">
-                            <i class="fas fa-tachometer-alt w-5 h-5"></i>
+                    <li class="relative group">
+                        <button class="flex items-center w-full px-6 py-3 text-sm text-pink-300 hover:bg-pink-800 hover:text-white transition-colors duration-200">
+                            <i class="fas fa-money-bill w-5 h-5"></i>
                             <span class="ml-3">Penggajian</span>
-                        </a>
+                            <i class="fas fa-chevron-down ml-auto transition-transform duration-200 group-hover:rotate-180"></i>
+                        </button>
+                        <ul class="hidden group-hover:block bg-pink-950 rounded-sm">
+                            <li>
+                                <a href="{% url 'penggajian_read' %}" 
+                                   class="flex items-center px-8 py-2 text-sm {% if request.resolver_match.url_name == 'penggajian_read' %}bg-pink-800 text-white{% else %}text-pink-300 hover:bg-pink-800 hover:text-white{% endif %} transition-colors duration-200">
+                                    <i class="fas fa-file-invoice-dollar w-5 h-5"></i>
+                                    <span class="ml-3">Penggajian</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'slip_gaji_read' %}" 
+                                   class="flex items-center px-8 py-2 text-sm {% if request.resolver_match.url_name == 'slip_gaji' %}bg-pink-800 text-white{% else %}text-pink-300 hover:bg-pink-800 hover:text-white{% endif %} transition-colors duration-200">
+                                    <i class="fas fa-receipt w-5 h-5"></i>
+                                    <span class="ml-3">Slip Gaji</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" 
+                                   class="flex items-center px-8 py-2 text-sm {% if request.resolver_match.url_name == 'izin_keluar' %}bg-pink-800 text-white{% else %}text-pink-300 hover:bg-pink-800 hover:text-white{% endif %} transition-colors duration-200">
+                                    <i class="fas fa-door-open w-5 h-5"></i>
+                                    <span class="ml-3">Izin Keluar</span>
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                 </ul>
             </nav>

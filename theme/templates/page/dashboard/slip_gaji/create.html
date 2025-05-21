@@ -1,0 +1,130 @@
+{% extends 'layout/dashboard/base.html' %}
+
+{% block title %}SI-Penggaji - Buat Slip Gaji{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-6 py-8">
+  <div class="bg-white rounded-xl shadow-md p-6">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">Buat Slip Gaji Baru</h2>
+
+    <form method="POST" class="space-y-6" novalidate autocomplete="off">
+      {% csrf_token %}
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="form-group">
+          <label for="penggajian" class="block text-sm font-medium text-gray-700 mb-2">
+            Penggajian <span class="text-red-500">*</span>
+          </label>
+          <select id="penggajian" 
+                  name="penggajian" 
+                  required 
+                  aria-required="true"
+                  class="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed">
+            <option value="" disabled selected>Pilih Penggajian</option>
+            {% for penggajian in penggajian_list %}
+              <option value="{{ penggajian.id }}" {% if form.penggajian.value == penggajian.id %}selected{% endif %}>
+                {{ penggajian }}
+              </option>
+            {% endfor %}
+          </select>
+          {% if form.penggajian.errors %}
+            <p class="mt-1 text-sm text-red-600" role="alert">{{ form.penggajian.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="user" class="block text-sm font-medium text-gray-700 mb-2">
+            Karyawan <span class="text-red-500">*</span>
+          </label>
+          <select id="user" 
+                  name="user" 
+                  required
+                  aria-required="true"
+                  class="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed">
+            <option value="" disabled selected>Pilih Karyawan</option>
+            {% for user in user_list %}
+              <option value="{{ user.id }}" {% if form.user.value == user.id %}selected{% endif %}>
+                {{ user.get_full_name }}
+              </option>
+            {% endfor %}
+          </select>
+          {% if form.user.errors %}
+            <p class="mt-1 text-sm text-red-600" role="alert">{{ form.user.errors.0 }}</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="form-group">
+          <label for="gaji_pokok" class="block text-sm font-medium text-gray-700 mb-2">
+            Gaji Pokok <span class="text-red-500">*</span>
+          </label>
+          <input type="number"
+                 id="gaji_pokok"
+                 name="gaji_pokok"
+                 required
+                 aria-required="true"
+                 value="{{ form.gaji_pokok.value|default:'' }}"
+                 placeholder="Masukkan gaji pokok"
+                 class="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                 pattern="[0-9]*"
+                 inputmode="numeric">
+          {% if form.gaji_pokok.errors %}
+            <p class="mt-1 text-sm text-red-600" role="alert">{{ form.gaji_pokok.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="total_potongan" class="block text-sm font-medium text-gray-700 mb-2">
+            Total Potongan
+          </label>
+          <input type="number"
+                 id="total_potongan"
+                 name="total_potongan"
+                 value="{{ form.total_potongan.value|default:'0' }}"
+                 placeholder="Masukkan total potongan"
+                 class="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                 pattern="[0-9]*"
+                 inputmode="numeric">
+          {% if form.total_potongan.errors %}
+            <p class="mt-1 text-sm text-red-600" role="alert">{{ form.total_potongan.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="gaji_bersih" class="block text-sm font-medium text-gray-700 mb-2">
+            Gaji Bersih
+          </label>
+          <input type="number"
+                 id="gaji_bersih"
+                 name="gaji_bersih"
+                 value="{{ form.gaji_bersih.value|default:'0' }}"
+                 readonly
+                 class="w-full px-3 py-2 rounded-lg border-2 border-gray-300 bg-gray-100 cursor-not-allowed">
+          {% if form.gaji_bersih.errors %}
+            <p class="mt-1 text-sm text-red-600" role="alert">{{ form.gaji_bersih.errors.0 }}</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="flex justify-end space-x-4 pt-6">
+        <a href="{% url 'slip_gaji_read' %}" 
+           class="px-6 py-2.5 border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition duration-200 flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+           role="button">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+          Batal
+        </a>
+        <button type="submit" 
+                class="px-6 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition duration-200 flex items-center disabled:opacity-50 disabled:cursor-not-allowed">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          Simpan Slip Gaji
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

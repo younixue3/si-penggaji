@@ -1,29 +1,87 @@
 from django.db import models
+from django.contrib.auth.models import User
 
-class Penggajian(models.Model):
-    # Status choices for Penggajian
-    STATUS_CHOICES = [
+STATUS_CHOICES = [
         ('progress', 'Progress'),
-        ('selesai', 'Selesai'), 
+        ('selesai', 'Selesai'),
         ('aktif', 'Aktif'),
     ]
 
-    days_in_month = models.IntegerField()
+MONTH_CHOICES = [
+        ('january', 'January'),
+        ('february', 'February'), 
+        ('march', 'March'),
+        ('april', 'April'),
+        ('may', 'May'),
+        ('june', 'June'),
+        ('july', 'July'),
+        ('august', 'August'),
+        ('september', 'September'),
+        ('october', 'October'),
+        ('november', 'November'),
+        ('december', 'December'),
+    ]
+
+class Penggajian(models.Model):
+
+    month = models.CharField(
+        max_length=20,
+        choices=MONTH_CHOICES,
+        help_text="The month for this payroll period"
+    )
+    days_in_month = models.IntegerField(
+        help_text="Number of working days in the month"
+    )
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
-        default='progress'
+        default='progress',
+        help_text="Current status of the payroll processing"
     )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        help_text="Timestamp when record was created"
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        help_text="Timestamp when record was last updated"
+    )
+
+    class Meta:
+        verbose_name = "Penggajian"
+        verbose_name_plural = "Penggajian"
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['month']),
+            models.Index(fields=['status']),
+        ]
+
     def __str__(self):
-        return f"Penggajian - {self.created_at.strftime('%B %Y')}"
+        return f"Penggajian - {self.month}"
+
+    def clean(self):
+        """Validate the model data."""
+        if self.days_in_month < 1 or self.days_in_month > 31:
+            raise ValidationError({
+                'days_in_month': 'Days in month must be between 1 and 31'
+            }) 
+
+    def save(self, *args, **kwargs):
+        # Get all active users
+        active_users = User.objects.all()
+        
+        # Create SlipGaji records for each active user
+        for user in active_users:
+            slipgaji = SlipGaji.objects.create(
+                penggajian=self.id,
+                user=user.id
+            )
+            print(slipgaji)
 
 class SlipGaji(models.Model):
     penggajian = models.ForeignKey(Penggajian, related_name='slip_gaji', on_delete=models.CASCADE)
-    user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
-    gaji_pokok = models.DecimalField(max_digits=12, decimal_places=2)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    gaji_pokok = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     total_potongan = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     gaji_bersih = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)

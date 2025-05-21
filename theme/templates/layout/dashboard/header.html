@@ -1,22 +1,22 @@
-<header class="top-0 left-0 right-0 bg-white shadow-md z-[1000] transition-all duration-300">
+<header class="top-0 left-0 right-0 bg-pink-50 shadow-md z-[1000] transition-all duration-300">
     <div class="flex justify-end items-center px-8 py-4 h-[70px] max-w-[1920px] mx-auto">
 
         <!-- Right side -->
         <div class="flex items-center gap-6">
             <!-- Notifications -->
             <div class="relative group">
-                <button class="dropdown-toggle relative p-2 hover:bg-gray-100 rounded-full transition-colors duration-200" type="button" id="notificationsDropdown" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
-                    <i class="fas fa-bell text-gray-700"></i>
-                    <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 min-w-[20px] flex items-center justify-center">3</span>
+                <button class="dropdown-toggle relative p-2 hover:bg-pink-100 rounded-full transition-colors duration-200" type="button" id="notificationsDropdown" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
+                    <i class="fas fa-bell text-pink-700"></i>
+                    <span class="absolute -top-1 -right-1 bg-pink-500 text-white text-xs rounded-full h-5 min-w-[20px] flex items-center justify-center">3</span>
                 </button>
-                <div class="dropdown-menu absolute right-0 hidden group-hover:block min-w-[300px] py-2 shadow-lg rounded-lg border border-gray-200 bg-white" aria-labelledby="notificationsDropdown">
-                    <div class="px-4 py-2 font-semibold border-b border-gray-200">Notifications</div>
+                <div class="dropdown-menu absolute right-0 hidden group-hover:block min-w-[300px] py-2 shadow-lg rounded-lg border border-pink-200 bg-white" aria-labelledby="notificationsDropdown">
+                    <div class="px-4 py-2 font-semibold border-b border-pink-200">Notifications</div>
                     <div class="max-h-[400px] overflow-y-auto">
-                        <a class="block px-4 py-3 hover:bg-gray-50 transition-colors duration-200" href="#">
+                        <a class="block px-4 py-3 hover:bg-pink-50 transition-colors duration-200" href="#">
                             <div class="flex items-start gap-3">
                                 <div class="flex-1">
                                     <div class="text-sm font-medium">New payroll processed</div>
-                                    <div class="text-xs text-gray-500 mt-1">2 minutes ago</div>
+                                    <div class="text-xs text-pink-500 mt-1">2 minutes ago</div>
                                 </div>
                             </div>
                         </a>
@@ -27,25 +27,25 @@
 
             <!-- User profile -->
             <div class="relative group">
-                <button class="dropdown-toggle flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <button class="dropdown-toggle flex items-center gap-3 p-2 hover:bg-pink-100 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-pink-500" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                     {% if request.user.profile_picture %}
-                        <img src="{{ request.user.profile_picture.url }}" alt="User Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-gray-200">
+                        <img src="{{ request.user.profile_picture.url }}" alt="User Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-pink-200">
                     {% else %}
-                        <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">
+                        <div class="w-10 h-10 rounded-full bg-pink-500 flex items-center justify-center text-white font-semibold">
                             {{ request.user.username|make_list|first|upper }}
                         </div>
                     {% endif %}
-                    <span class="font-medium text-gray-800">{{ request.user.get_full_name|default:request.user.username }}</span>
-                    <i class="fas fa-chevron-down text-sm text-gray-500 transition-transform duration-200 group-hover:rotate-180"></i>
+                    <span class="font-medium text-pink-800">{{ request.user.get_full_name|default:request.user.username }}</span>
+                    <i class="fas fa-chevron-down text-sm text-pink-500 transition-transform duration-200 group-hover:rotate-180"></i>
                 </button>
-                <div class="dropdown-menu absolute right-0 min-w-[220px] hidden group-hover:block py-2 shadow-lg rounded-lg border border-gray-200 bg-white z-50" aria-labelledby="userDropdown">
-                    <a class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 transition-colors duration-200" href="#">
-                        <i class="fas fa-user w-5 text-gray-600"></i>
-                        <span class="text-gray-700">Profile</span>
+                <div class="dropdown-menu absolute right-0 min-w-[220px] hidden group-hover:block py-2 shadow-lg rounded-lg border border-pink-200 bg-white z-50" aria-labelledby="userDropdown">
+                    <a class="flex items-center gap-3 px-4 py-2 hover:bg-pink-50 transition-colors duration-200" href="#">
+                        <i class="fas fa-user w-5 text-pink-600"></i>
+                        <span class="text-pink-700">Profile</span>
                     </a>
-                    <a class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 transition-colors duration-200" href="#">
-                        <i class="fas fa-cog w-5 text-gray-600"></i>
-                        <span class="text-gray-700">Settings</span>
+                    <a class="flex items-center gap-3 px-4 py-2 hover:bg-pink-50 transition-colors duration-200" href="#">
+                        <i class="fas fa-cog w-5 text-pink-600"></i>
+                        <span class="text-pink-700">Settings</span>
                     </a>
                 </div>
             </div>

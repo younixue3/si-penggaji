@@ -52,6 +52,7 @@
       type="image/png"
       href="{% static 'images/favicon.png' %}"
     />
+    <script src="https://kit.fontawesome.com/6fd3995802.js" crossorigin="anonymous"></script>
 
     {% tailwind_css %}
     {% block extra_css %}{% endblock %}
@@ -66,10 +67,12 @@
 
         <!-- Main Content -->
         <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
-          <div class="container mx-auto">
+          <div class="container mx-auto h-full min-h-screen flex flex-col">
             <!-- Header -->
             {% include "layout/dashboard/header.html" %}
-            {% block content %}{% endblock content %}
+            <div class="h-full">
+              {% block content %}{% endblock content %}
+            </div>
             <!-- Footer -->
             {% include "layout/dashboard/footer.html" %}
           </div>

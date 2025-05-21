@@ -1,10 +1,10 @@
 {% extends 'layout/dashboard/base.html' %}
-{% block title %}SI-Penggaji - Data Penggajian{% endblock %}
+{% block title %}SI-Penggaji - Data Slip Gaji{% endblock %}
 {% block content %}
 <div class="container mx-auto px-6 py-8">
   <div class="bg-white rounded-xl shadow-md">
     <div class="flex justify-between items-center p-6 border-b">
-      <h3 class="text-lg font-semibold text-gray-800">Data Penggajian</h3>
+      <h3 class="text-lg font-semibold text-gray-800">Data Slip Gaji</h3>
       <div class="flex space-x-2">
         <form class="flex" method="GET">
           <input type="text" name="search" placeholder="Cari..." value="{{ request.GET.search }}"
@@ -14,70 +14,66 @@
             <i class="fas fa-search"></i>
           </button>
         </form>
-        <a href="{% url 'penggajian_create' %}" 
+        {% comment %} <a href="{% url 'slip_gaji_create' %}" 
            class="px-4 py-2 bg-pink-400 text-white rounded hover:bg-pink-500 focus:outline-none focus:ring-2 focus:ring-rose-500 flex items-center">
           <i class="fas fa-plus mr-2"></i>
-          Tambah Penggajian
-        </a>
+          Tambah Slip Gaji
+        </a> {% endcomment %}
       </div>
     </div>
 
-    <div>
+    <div class="overflow-x-auto">
       <table class="w-full table-auto">
         <thead class="bg-pink-50">
           <tr>
             <th class="p-4 text-left font-medium text-gray-600">No</th>
-            <th class="p-4 text-left font-medium text-gray-600">Bulan</th>
-            <th class="p-4 text-left font-medium text-gray-600">Jumlah Hari</th>
+            <th class="p-4 text-left font-medium text-gray-600">User</th>
+            <th class="p-4 text-left font-medium text-gray-600">Periode</th>
+            <th class="p-4 text-left font-medium text-gray-600">Gaji Pokok</th>
+            <th class="p-4 text-left font-medium text-gray-600">Total Potongan</th>
+            <th class="p-4 text-left font-medium text-gray-600">Gaji Bersih</th>
             <th class="p-4 text-left font-medium text-gray-600">Status</th>
             <th class="p-4 text-left font-medium text-gray-600">Aksi</th>
           </tr>
         </thead>
         <tbody>
-          {% for penggajian in penggajians %}
+          {% for slip in slip_gajis %}
           <tr class="border-b hover:bg-pink-50">
             <td class="p-4">{{ forloop.counter }}</td>
-            <td class="p-4 first-letter:uppercase">{{ penggajian.month }}</td>
-            <td class="p-4">{{ penggajian.days_in_month }} hari</td>
+            <td class="p-4">{{ slip.user.username }}</td>
+            <td class="p-4 first-letter:uppercase">{{ slip.penggajian.month }}</td>
+            <td class="p-4">Rp {{ slip.gaji_pokok|floatformat:0 }}</td>
+            <td class="p-4">Rp {{ slip.total_potongan|floatformat:0 }}</td>
+            <td class="p-4">Rp {{ slip.gaji_bersih|floatformat:0 }}</td>
             <td class="p-4">
               <div class="relative inline-block">
                 <button type="button" 
                         class="text-gray-600 hover:text-gray-800 focus:outline-none cursor-pointer"
-                        onclick="toggleDropdown(event, 'dropdown-{{ penggajian.id }}')">
-                        {% if penggajian.status == 'aktif' %}
-                          <span class="px-2 py-1 text-sm font-medium text-green-700 bg-green-100 rounded-full">Aktif</span>
-                        {% elif penggajian.status == 'progress' %}
-                          <span class="px-2 py-1 text-sm font-medium text-yellow-700 bg-yellow-100 rounded-full">Progress</span>
-                        {% elif penggajian.status == 'selesai' %}
-                          <span class="px-2 py-1 text-sm font-medium text-blue-700 bg-blue-100 rounded-full">Selesai</span>
+                        onclick="toggleDropdown(event, 'dropdown-{{ slip.id }}')">
+                        {% if slip.status == 'draft' %}
+                          <span class="px-2 py-1 text-sm font-medium text-yellow-700 bg-yellow-100 rounded-full">Draft</span>
+                        {% elif slip.status == 'terbit' %}
+                          <span class="px-2 py-1 text-sm font-medium text-green-700 bg-green-100 rounded-full">Terbit</span>
                         {% else %}
-                          <span class="px-2 py-1 text-sm font-medium text-gray-700 bg-gray-100 rounded-full">{{ penggajian.status }}</span>
+                          <span class="px-2 py-1 text-sm font-medium text-gray-700 bg-gray-100 rounded-full">{{ slip.status }}</span>
                         {% endif %}
                 </button>
-                <div id="dropdown-{{ penggajian.id }}" 
+                <div id="dropdown-{{ slip.id }}" 
                      class="hidden absolute right-0 w-48 bg-white rounded-md shadow-lg z-50 border border-gray-200">
-                  <form action="{% url 'penggajian_update' penggajian.id %}" method="POST" class="inline">
+                  <form action="{% url 'slip_gaji_update' slip.id %}" method="POST" class="inline">
                     {% csrf_token %}
-                    <input type="hidden" name="status" value="aktif">
+                    <input type="hidden" name="status" value="draft">
                     <input type="hidden" name="update_status" value="true">
                     <button type="submit" class="block cursor-pointer hover:bg-gray-100 w-full px-4 py-2 text-sm text-gray-700 text-start transition duration-150" onclick="return confirm('Apakah Anda yakin ingin merubah status data ini?')">
-                      Aktif
+                      Draft
                     </button>
                   </form>
-                  <form action="{% url 'penggajian_update' penggajian.id %}" method="POST" class="inline">
+                  <form action="{% url 'slip_gaji_update' slip.id %}" method="POST" class="inline">
                     {% csrf_token %}
-                    <input type="hidden" name="status" value="progress">
+                    <input type="hidden" name="status" value="terbit">
                     <input type="hidden" name="update_status" value="true">
                     <button type="submit" class="block cursor-pointer hover:bg-gray-100 w-full px-4 py-2 text-sm text-gray-700 text-start transition duration-150" onclick="return confirm('Apakah Anda yakin ingin merubah status data ini?')">
-                      Progress
-                    </button>
-                  </form>
-                  <form action="{% url 'penggajian_update' penggajian.id %}" method="POST" class="inline">
-                    {% csrf_token %}
-                    <input type="hidden" name="status" value="selesai">
-                    <input type="hidden" name="update_status" value="true">
-                    <button type="submit" class="block cursor-pointer hover:bg-gray-100 w-full px-4 py-2 text-sm text-gray-700 text-start transition duration-150" onclick="return confirm('Apakah Anda yakin ingin merubah status data ini?')">
-                      Selesai
+                      Terbit
                     </button>
                   </form>
                 </div>
@@ -85,43 +81,46 @@
             </td>
             <td class="p-4">
               <div class="flex items-center space-x-3">
-                <a href="{% url 'penggajian_update' penggajian.id %}" class="text-rose-600 hover:text-rose-800">
+                <a href="{% url 'slip_gaji_update' slip.id %}" class="text-rose-600 hover:text-rose-800">
                   <i class="fas fa-edit"></i>
                 </a>
-                <form action="{% url 'penggajian_delete' penggajian.id %}" method="POST" class="inline">
+                <form action="{% url 'slip_gaji_delete' slip.id %}" method="POST" class="inline">
                   {% csrf_token %}
                   <button type="submit" class="cursor-pointer text-fuchsia-600 hover:text-fuchsia-800" onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
                     <i class="fas fa-trash"></i>
                   </button>
                 </form>
+                <a href="{% url 'slip_gaji_print' slip.id %}" target="_blank" class="text-blue-600 hover:text-blue-800">
+                  <i class="fas fa-print"></i>
+                </a>
               </div>
             </td>
           </tr>
           {% empty %}
           <tr>
-            <td colspan="5" class="p-4 text-center text-gray-500">Tidak ada data penggajian</td>
+            <td colspan="8" class="p-4 text-center text-gray-500">Tidak ada data slip gaji</td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
 
-    {% if salaries.has_other_pages %}
+    {% if slip_gajis.has_other_pages %}
     <div class="flex items-center justify-between px-6 py-4 bg-pink-50">
       <p class="text-sm text-gray-600">
-        Menampilkan {{ salaries.start_index }} - {{ salaries.end_index }} dari {{ salaries.paginator.count }} data
+        Menampilkan {{ slip_gajis.start_index }} - {{ slip_gajis.end_index }} dari {{ slip_gajis.paginator.count }} data
       </p>
       
       <div class="flex items-center space-x-2">
-        {% if salaries.has_previous %}
-        <a href="?page={{ salaries.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" 
+        {% if slip_gajis.has_previous %}
+        <a href="?page={{ slip_gajis.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" 
            class="px-4 py-2 text-sm bg-white border rounded-md hover:bg-pink-50">
           Previous
         </a>
         {% endif %}
 
-        {% for num in salaries.paginator.page_range %}
-          {% if salaries.number == num %}
+        {% for num in slip_gajis.paginator.page_range %}
+          {% if slip_gajis.number == num %}
           <span class="px-4 py-2 text-sm text-white bg-pink-500 rounded-md">{{ num }}</span>
           {% else %}
           <a href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
@@ -131,8 +130,8 @@
           {% endif %}
         {% endfor %}
 
-        {% if salaries.has_next %}
-        <a href="?page={{ salaries.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+        {% if slip_gajis.has_next %}
+        <a href="?page={{ slip_gajis.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
            class="px-4 py-2 text-sm bg-white border rounded-md hover:bg-pink-50">
           Next
         </a>
@@ -142,9 +141,11 @@
     {% endif %}
   </div>
 </div>
+
+{% endblock %}
+
 {% block extra_js %}
 <script>
-  // Close dropdowns when clicking outside
   document.addEventListener('click', function(event) {
     const dropdowns = document.querySelectorAll('[id^="dropdown-"]');
     dropdowns.forEach(dropdown => {
@@ -159,16 +160,13 @@
     const dropdown = document.getElementById(dropdownId);
     const allDropdowns = document.querySelectorAll('[id^="dropdown-"]');
     
-    // Hide all other dropdowns
     allDropdowns.forEach(d => {
       if (d.id !== dropdownId) {
         d.classList.add('hidden');
       }
     });
   
-    // Toggle current dropdown
     dropdown.classList.toggle('hidden');
   }
-  </script>
-{% endblock %}
+</script>
 {% endblock %}
