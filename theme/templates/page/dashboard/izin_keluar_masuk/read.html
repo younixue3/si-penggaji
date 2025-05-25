@@ -1,10 +1,12 @@
 {% extends 'layout/dashboard/base.html' %}
-{% block title %}SI-Penggaji - Data Slip Gaji{% endblock %}
+
+{% block title %}SI-Penggaji - Data Izin Keluar Masuk{% endblock %}
+
 {% block content %}
 <div class="container mx-auto px-6 py-8">
   <div class="bg-white rounded-xl shadow-md">
     <div class="flex justify-between items-center p-6 border-b">
-      <h3 class="text-lg font-semibold text-gray-800">Data Slip Gaji</h3>
+      <h3 class="text-lg font-semibold text-gray-800">Data Izin Keluar Masuk</h3>
       <div class="flex space-x-2">
         <form class="flex" method="GET">
           <input type="text" name="search" placeholder="Cari..." value="{{ request.GET.search }}"
@@ -14,11 +16,11 @@
             <i class="fas fa-search"></i>
           </button>
         </form>
-        {% comment %} <a href="{% url 'slip_gaji_create' %}" 
+        <a href="{% url 'izin_create' penggajian_id=penggajian_id slip_gaji_id=slip_gaji.id %}"
            class="px-4 py-2 bg-pink-400 text-white rounded hover:bg-pink-500 focus:outline-none focus:ring-2 focus:ring-rose-500 flex items-center">
           <i class="fas fa-plus mr-2"></i>
-          Tambah Slip Gaji
-        </a> {% endcomment %}
+          Tambah Izin
+        </a>
       </div>
     </div>
 
@@ -27,61 +29,57 @@
         <thead class="bg-pink-50">
           <tr>
             <th class="p-4 text-left font-medium text-gray-600">No</th>
-            <th class="p-4 text-left font-medium text-gray-600">User</th>
-            <th class="p-4 text-left font-medium text-gray-600">Gaji Pokok</th>
-            <th class="p-4 text-left font-medium text-gray-600">Total Potongan</th>
-            <th class="p-4 text-left font-medium text-gray-600">Gaji Bersih</th>
+            <th class="p-4 text-left font-medium text-gray-600">Tanggal</th>
+            <th class="p-4 text-left font-medium text-gray-600">Jam Keluar</th>
+            <th class="p-4 text-left font-medium text-gray-600">Jam Masuk</th>
+            <th class="p-4 text-left font-medium text-gray-600">Pegawai</th>
             <th class="p-4 text-left font-medium text-gray-600">Aksi</th>
-            <th class="p-4 text-left font-medium text-gray-600">Izin</th>
           </tr>
         </thead>
         <tbody>
-          {% for slip in slip_gaji_list %}
+          {% for izin in izin_list %}
           <tr class="border-b hover:bg-pink-50">
             <td class="p-4">{{ forloop.counter }}</td>
-            <td class="p-4">{{ slip.user.username }}</td>
-            <td class="p-4">Rp {{ slip.gaji_pokok|floatformat:0 }}</td>
-            <td class="p-4">Rp {{ slip.total_potongan|floatformat:0 }}</td>
-            <td class="p-4">Rp {{ slip.gaji_bersih|floatformat:0 }}</td>
+            <td class="p-4">{{ izin.date|date:"d/m/Y" }}</td>
+            <td class="p-4">{{ izin.time_out|time:"H:i" }}</td>
+            <td class="p-4">{{ izin.time_in|time:"H:i" }}</td>
+            <td class="p-4">{{ izin.slip_gaji.user.username }}</td>
             <td class="p-4">
               <div class="flex items-center space-x-3">
-                <a href="{% url 'slip_gaji_update' penggajian_id=slip.penggajian.id pk=slip.id %}" class="text-rose-600 hover:text-rose-800">
+                <a href="{% url 'izin_keluar_masuk_update' pk=izin.id %}" class="text-rose-600 hover:text-rose-800">
                   <i class="fas fa-edit"></i>
+                </a>
+                <a href="{% url 'izin_keluar_masuk_delete' pk=izin.id %}" class="text-rose-600 hover:text-rose-800">
+                  <i class="fas fa-trash"></i>
                 </a>
               </div>
             </td>
-            <td>
-              <a href="{% url 'izin_read' penggajian_id=slip.penggajian.id slip_gaji_id=slip.id %}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500">
-                <i class="fas fa-file-invoice mr-2"></i>
-                Lihat Izin Keluar
-              </a>
-          </td>
           </tr>
           {% empty %}
           <tr>
-            <td colspan="8" class="p-4 text-center text-gray-500">Tidak ada data slip gaji</td>
+            <td colspan="6" class="p-4 text-center text-gray-500">Tidak ada data izin keluar masuk</td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
 
-    {% if slip_gajis.has_other_pages %}
+    {% if izin_list.has_other_pages %}
     <div class="flex items-center justify-between px-6 py-4 bg-pink-50">
       <p class="text-sm text-gray-600">
-        Menampilkan {{ slip_gajis.start_index }} - {{ slip_gajis.end_index }} dari {{ slip_gajis.paginator.count }} data
+        Menampilkan {{ izin_list.start_index }} - {{ izin_list.end_index }} dari {{ izin_list.paginator.count }} data
       </p>
       
       <div class="flex items-center space-x-2">
-        {% if slip_gajis.has_previous %}
-        <a href="?page={{ slip_gajis.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" 
+        {% if izin_list.has_previous %}
+        <a href="?page={{ izin_list.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" 
            class="px-4 py-2 text-sm bg-white border rounded-md hover:bg-pink-50">
           Previous
         </a>
         {% endif %}
 
-        {% for num in slip_gajis.paginator.page_range %}
-          {% if slip_gajis.number == num %}
+        {% for num in izin_list.paginator.page_range %}
+          {% if izin_list.number == num %}
           <span class="px-4 py-2 text-sm text-white bg-pink-500 rounded-md">{{ num }}</span>
           {% else %}
           <a href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
@@ -91,8 +89,8 @@
           {% endif %}
         {% endfor %}
 
-        {% if slip_gajis.has_next %}
-        <a href="?page={{ slip_gajis.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+        {% if izin_list.has_next %}
+        <a href="?page={{ izin_list.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
            class="px-4 py-2 text-sm bg-white border rounded-md hover:bg-pink-50">
           Next
         </a>
@@ -102,7 +100,6 @@
     {% endif %}
   </div>
 </div>
-
 {% endblock %}
 
 {% block extra_js %}
