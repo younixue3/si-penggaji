@@ -72,7 +72,7 @@
       </div>
 
       <div class="flex justify-end space-x-4 pt-6">
-        <a href="{% url 'izin_keluar_masuk_read' slip_gaji_id=izin.slip_gaji.id %}" 
+        <a href="{% url 'izin_read' penggajian_id=izin.slip_gaji.penggajian.id slip_gaji_id=izin.slip_gaji.id %}" 
            class="inline-flex items-center px-6 py-2.5 border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-gray-200 focus:ring-offset-2"
            role="button">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

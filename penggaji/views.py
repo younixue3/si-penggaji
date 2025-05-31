@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from .models import Penggajian, SlipGaji, IzinKeluarMasuk, MONTH_CHOICES, STATUS_CHOICES
 from django.contrib.auth.models import User
+from datetime import datetime
 
 @login_required
 def penggajian_read(request):
@@ -183,26 +184,65 @@ def slip_gaji_create(request, penggajian_pk):
 def izin_read(request, penggajian_id, slip_gaji_id):
     slip_gaji = get_object_or_404(SlipGaji, pk=slip_gaji_id)
     izin_list = slip_gaji.izin_list.all()
+    
+    # Calculate total nilai_izin from all izin records
+    total_nilai_izin = sum(izin.nilai_izin for izin in izin_list)
+    
     return render(request, 'page/dashboard/izin_keluar_masuk/read.html', {
         'slip_gaji': slip_gaji,
         'izin_list': izin_list,
-        'penggajian_id': penggajian_id
+        'penggajian_id': penggajian_id,
+        'total_nilai_izin': total_nilai_izin
     })
 
 @login_required
-def izin_update(request, pk, slip_gaji_pk):
+def izin_update(request, pk, slip_gaji_id, penggajian_id):
     izin = get_object_or_404(IzinKeluarMasuk, pk=pk)
-    slip_gaji = get_object_or_404(SlipGaji, pk=slip_gaji_pk)
+    slip_gaji = get_object_or_404(SlipGaji, pk=slip_gaji_id)
+    
     if request.method == "POST":
-        izin.tanggal = request.POST.get('tanggal')
-        izin.jenis = request.POST.get('jenis')
-        izin.keterangan = request.POST.get('keterangan')
-        izin.save()
-        # Recalculate slip gaji
-        slip_gaji.save()
-        return redirect('izin_read', slip_gaji_pk=slip_gaji_pk)
+        try:
+            # Get and validate required fields
+            date = request.POST.get('date')
+            time_out = request.POST.get('time_out')
+            time_in = request.POST.get('time_in')
+
+            if not all([date, time_out, time_in]):
+                raise ValueError("All fields are required")
+
+            # Calculate nilai_izin based on time difference in minutes
+            time_out_obj = datetime.strptime(time_out, '%H:%M')
+            time_in_obj = datetime.strptime(time_in, '%H:%M')
+            time_diff = time_in_obj - time_out_obj
+            nilai_izin = time_diff.total_seconds() / 60
+
+            # Update izin record
+            izin.date = date
+            izin.time_out = time_out
+            izin.time_in = time_in
+            izin.nilai_izin = nilai_izin
+            izin.save()
+
+            # Recalculate slip gaji
+            slip_gaji.save()
+            
+            return redirect('izin_read', penggajian_id=penggajian_id, slip_gaji_id=slip_gaji_id)
+
+        except ValueError as e:
+            return render(request, 'page/dashboard/izin_keluar_masuk/update.html', {
+                'izin': izin,
+                'slip_gaji': slip_gaji,
+                'error_message': str(e)
+            })
+        except Exception as e:
+            return render(request, 'page/dashboard/izin_keluar_masuk/update.html', {
+                'izin': izin,
+                'slip_gaji': slip_gaji,
+                'error_message': "An error occurred while updating the record"
+            })
+
     return render(request, 'page/dashboard/izin_keluar_masuk/update.html', {
-       'izin': izin,
+        'izin': izin,
         'slip_gaji': slip_gaji
     })
 
@@ -214,35 +254,42 @@ def izin_create(request, slip_gaji_id, penggajian_id):
     if request.method == "POST":
         try:
             # Validate required fields
-            tanggal = request.POST.get('tanggal')
-            jenis = request.POST.get('jenis')
-            keterangan = request.POST.get('keterangan')
+            date = request.POST.get('date')
+            time_out = request.POST.get('time_out') 
+            time_in = request.POST.get('time_in')
+
+            # Calculate nilai_izin based on time difference in minutes
+            time_out_obj = datetime.strptime(time_out, '%H:%M')
+            time_in_obj = datetime.strptime(time_in, '%H:%M')
+            time_diff = time_in_obj - time_out_obj
+            nilai_izin = time_diff.total_seconds() / 60  # Convert to minutes
             
-            if not all([tanggal, jenis, keterangan]):
+            if not all([date, time_out, time_in, nilai_izin]):
                 raise ValueError("All fields are required")
                 
             izin = IzinKeluarMasuk.objects.create(
                 slip_gaji=slip_gaji,
-                tanggal=tanggal,
-                jenis=jenis,
-                keterangan=keterangan
+                date=date,
+                time_out=time_out,
+                time_in=time_in,
+                nilai_izin=nilai_izin
             )
             
             # Recalculate slip gaji
             slip_gaji.save()
             
-            return redirect('izin_read', 
-                          penggajian_id=penggajian_id, 
-                          slip_gaji_id=slip_gaji_id)
+            return redirect('izin_read', penggajian_id=penggajian_id, slip_gaji_id=slip_gaji.id)
                           
         except ValueError as e:
             return render(request, 'page/dashboard/izin_keluar_masuk/create.html', {
-                'slip_gaji': slip_gaji,
+                'slip_gaji_id': slip_gaji.id,
+                'penggajian_id': penggajian.id,
                 'error_message': str(e)
             })
         except Exception as e:
             return render(request, 'page/dashboard/izin_keluar_masuk/create.html', {
-                'slip_gaji': slip_gaji,
+                'slip_gaji_id': slip_gaji.id,
+                'penggajian_id': penggajian.id,
                 'error_message': "An error occurred while creating the record"
             })
             
@@ -252,10 +299,14 @@ def izin_create(request, slip_gaji_id, penggajian_id):
     })
 
 @login_required
-def izin_delete(request, pk):
+def izin_delete(request, pk, penggajian_id, slip_gaji_id):
     izin = get_object_or_404(IzinKeluarMasuk, pk=pk)
+    slip_gaji = get_object_or_404(SlipGaji, pk=slip_gaji_id)
+    
     if request.method == "POST":
         izin.delete()
-        return redirect('slip_gaji_detail', pk=izin.slip_gaji.pk)
+        # Recalculate slip gaji after deleting izin
+        slip_gaji.save()
+        return redirect('izin_read', penggajian_id=penggajian_id, slip_gaji_id=slip_gaji_id)
     return HttpResponse('Method not allowed', status=405)
 
