@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from .models import Penggajian, SlipGaji, IzinKeluarMasuk, MONTH_CHOICES, STATUS_CHOICES
 from django.contrib.auth.models import User
 from datetime import datetime
+from mysite.utils.helpers import dd
 
 @login_required
 def penggajian_read(request):
@@ -146,12 +147,17 @@ def slip_gaji_update(request, pk, penggajian_id):
     penggajian = get_object_or_404(Penggajian, pk=penggajian_id)
     
     if request.method == "POST":
-        slip_gaji.karyawan = request.POST.get('karyawan')
-        slip_gaji.gaji_pokok = request.POST.get('gaji_pokok')
-        slip_gaji.tunjangan = request.POST.get('tunjangan')
-        slip_gaji.potongan = request.POST.get('potongan')
-        slip_gaji.save()
-        return redirect('slip_gaji_read', penggajian_id=penggajian_id)
+        try:
+            # Convert string values to Decimal for calculations
+            slip_gaji.gaji_pokok = request.POST.get('gaji_pokok')
+            slip_gaji.save()
+            return redirect('slip_gaji_read', penggajian_id=penggajian_id)
+        except (ValueError, TypeError):
+            return render(request, 'page/dashboard/slip_gaji/update.html', {
+                'slip_gaji': slip_gaji,
+                'penggajian': penggajian,
+                'error_message': 'Please enter valid numeric values for monetary fields'
+            })
         
     return render(request, 'page/dashboard/slip_gaji/update.html', {
         'slip_gaji': slip_gaji,

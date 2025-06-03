@@ -106,7 +106,12 @@ class Penggajian(models.Model):
 class SlipGaji(models.Model):
     penggajian = models.ForeignKey(Penggajian, related_name='slip_gaji', on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    gaji_pokok = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    gaji_pokok = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+        help_text="Base salary amount"
+    )
     total_potongan = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     gaji_bersih = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
