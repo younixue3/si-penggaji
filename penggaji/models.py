@@ -17,18 +17,18 @@ STATUS_CHOICES = [
 ]
 
 MONTH_CHOICES = [
-    ('january', 'January'),
-    ('february', 'February'),
-    ('march', 'March'),
-    ('april', 'April'), 
-    ('may', 'May'),
-    ('june', 'June'),
-    ('july', 'July'),
-    ('august', 'August'),
-    ('september', 'September'),
-    ('october', 'October'),
-    ('november', 'November'),
-    ('december', 'December'),
+    ('January', 'January'),
+    ('February', 'February'), 
+    ('March', 'March'),
+    ('April', 'April'),
+    ('May', 'May'),
+    ('June', 'June'),
+    ('July', 'July'),
+    ('August', 'August'),
+    ('September', 'September'),
+    ('October', 'October'),
+    ('November', 'November'),
+    ('December', 'December'),
 ]
 
 class TableGaji(models.Model):
@@ -91,8 +91,7 @@ class Penggajian(models.Model):
         for user in users:
             slip_gaji = SlipGaji(
                 penggajian=self,
-                user=user,
-                gaji_bersih=0
+                user=user
             )
             slip_gaji.save()  # This will trigger the save() method
 
@@ -157,7 +156,7 @@ class SlipGaji(models.Model):
         # Get month name and convert to datetime
         month_name = self.penggajian.month
         current_year = datetime.now().year
-        month_num = datetime.strptime(month_name, '%B').month if month_name.istitle() else datetime.strptime(month_name, '%B'.lower()).month
+        month_num = datetime.strptime(month_name, '%B').month
         
         # Create date range from 5th to days_in_month
         start_date = datetime(current_year, month_num, 5)
@@ -240,7 +239,6 @@ class IzinKeluarMasuk(models.Model):
 
         self.upah_harian = upah_harian
 
-
         return self.upah_harian
     
     def calculate_nilai_izin(self):
@@ -262,7 +260,6 @@ class IzinKeluarMasuk(models.Model):
 
         self.slip_gaji.calculate_gaji_bersih()
         self.slip_gaji.save(update_fields=['gaji_bersih'])
-
 
 # # Signal handlers for automatic gaji bersih calculation
 # @receiver(post_save, sender=IzinKeluarMasuk)

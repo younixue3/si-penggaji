@@ -34,13 +34,14 @@
                             <span class="ml-3">Dashboard</span>
                         </a>
                     </li>
-                    <li class="relative group">
+                    <li class="relative">
+                        <input type="checkbox" class="absolute opacity-0 inset-0 w-full h-12 cursor-pointer peer">
                         <button class="flex items-center w-full px-6 py-3 text-sm text-pink-300 hover:bg-pink-800 hover:text-white transition-colors duration-200">
                             <i class="fas fa-money-bill w-5 h-5"></i>
                             <span class="ml-3">Penggajian</span>
-                            <i class="fas fa-chevron-down ml-auto transition-transform duration-200 group-hover:rotate-180"></i>
+                            <i class="fas fa-chevron-down ml-auto transition-transform duration-200 peer-checked:rotate-180"></i>
                         </button>
-                        <ul class="hidden group-hover:block bg-pink-950 rounded-sm">
+                        <ul class="hidden peer-checked:block bg-pink-950 rounded-sm">
                             <li>
                                 <a href="{% url 'penggajian_read' %}" 
                                    class="flex items-center px-8 py-2 text-sm {% if request.resolver_match.url_name == 'penggajian_read' %}bg-pink-800 text-white{% else %}text-pink-300 hover:bg-pink-800 hover:text-white{% endif %} transition-colors duration-200">

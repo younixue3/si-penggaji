@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'landingPage',
     'authPage',
     'dashboard',
+    # 'pengelolaKaryawan'
 ]
 
 MIDDLEWARE = [

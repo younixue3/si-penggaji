@@ -73,6 +73,74 @@
             <div class="h-full">
               {% block content %}{% endblock content %}
             </div>
+<!-- Toast Container -->
+<div id="toast-container" class="fixed bottom-4 right-4 z-50">
+
+{% if messages %}
+  {% for message in messages %}
+    {% if message.tags == 'success' %}
+      <div id="toast-success" class="flex items-center w-full max-w-md p-5 mb-4 text-gray-800 bg-white rounded-xl shadow-xl shadow-green-100/50 border-2 border-green-200 transition-all duration-300 ease-in-out transform opacity-0 hover:scale-105" role="alert">
+        <div class="inline-flex items-center justify-center flex-shrink-0 w-12 h-12 text-green-500 bg-green-50 rounded-xl">
+          <i class="fas fa-check-circle text-2xl"></i>
+        </div>
+        <div class="ml-5 text-base font-medium">{{ message }}</div>
+        <button type="button" class="ml-auto -mx-2 -my-2 bg-white text-gray-500 hover:text-green-600 rounded-xl focus:ring-2 focus:ring-green-300 p-2 hover:bg-green-50 inline-flex items-center justify-center h-10 w-10 transition-all duration-200" onclick="closeToast('toast-success')">
+          <i class="fas fa-times text-lg"></i>
+        </button>
+      </div>
+    {% endif %}
+    {% if message.tags == 'error' %}
+      <div id="toast-error" class="flex items-center w-full max-w-md p-5 mb-4 text-gray-800 bg-white rounded-xl shadow-xl shadow-red-100/50 border-2 border-red-200 transition-all duration-300 ease-in-out transform opacity-0 hover:scale-105" role="alert">
+        <div class="inline-flex items-center justify-center flex-shrink-0 w-12 h-12 text-red-500 bg-red-50 rounded-xl">
+          <i class="fas fa-exclamation-circle text-2xl"></i>
+        </div>
+        <div class="ml-5 text-base font-medium">{{ message }}</div>
+        <button type="button" class="ml-auto -mx-2 -my-2 bg-white text-gray-500 hover:text-red-600 rounded-xl focus:ring-2 focus:ring-red-300 p-2 hover:bg-red-50 inline-flex items-center justify-center h-10 w-10 transition-all duration-200" onclick="closeToast('toast-error')">
+          <i class="fas fa-times text-lg"></i>
+        </button>
+      </div>
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+</div>
+
+<script>
+  function showToast(toastId) {
+    const toast = document.getElementById(toastId);
+    if (toast) {
+      toast.classList.remove('opacity-0');
+      toast.classList.add('opacity-100');
+      setTimeout(() => {
+        closeToast(toastId);
+      }, 5000);
+    }
+  }
+
+  function closeToast(toastId) {
+    const toast = document.getElementById(toastId);
+    if (toast) {
+      toast.classList.remove('opacity-100');
+      toast.classList.add('opacity-0');
+      setTimeout(() => {
+        toast.remove();
+      }, 300);
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 500);
+    }
+  }
+
+  // Show all toasts on page load
+  document.addEventListener('DOMContentLoaded', () => {
+    const toasts = document.querySelectorAll('[id^="toast-"]');
+    toasts.forEach(toast => {
+      setTimeout(() => {
+        showToast(toast.id);
+      }, 100);
+    });
+  });
+</script>
             <!-- Footer -->
             {% include "layout/dashboard/footer.html" %}
           </div>
