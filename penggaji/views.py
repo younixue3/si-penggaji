@@ -27,13 +27,9 @@ def penggajian_create(request):
             if not all([days_in_month, month, status]):
                 raise ValueError("All fields are required")
 
-            last_penggajian = Penggajian.objects.first()
-            last_penggajian.status = 'selesai'
-            last_penggajian.save()
-
             # Create new penggajian record
             penggajian = Penggajian.objects.create(
-                days_in_month=days_in_month,
+                days_in_month=int(days_in_month),
                 month=month,
                 status=status
             )
@@ -149,7 +145,7 @@ def slip_gaji_update(request, pk, penggajian_id):
     if request.method == "POST":
         try:
             # Convert string values to Decimal for calculations
-            slip_gaji.gaji_pokok = request.POST.get('gaji_pokok')
+            slip_gaji.gaji_pokok = int(request.POST.get('gaji_pokok'))
             slip_gaji.save()
             return redirect('slip_gaji_read', penggajian_id=penggajian_id)
         except (ValueError, TypeError):
@@ -210,23 +206,37 @@ def izin_update(request, pk, slip_gaji_id, penggajian_id):
         try:
             # Get and validate required fields
             date = request.POST.get('date')
+            # Get time values from POST and convert to datetime objects
             time_out = request.POST.get('time_out')
             time_in = request.POST.get('time_in')
+            time_work = request.POST.get('time_work')
+            potongan = True if request.POST.get('potongan') == 'on' else False
 
-            if not all([date, time_out, time_in]):
+            if not all([date, time_out, time_in, time_work]):
                 raise ValueError("All fields are required")
 
+            # Parse time strings into datetime objects
+            try:
+                time_out_obj = datetime.strptime(time_out, '%H:%M')
+                time_in_obj = datetime.strptime(time_in, '%H:%M')
+                time_work_obj = datetime.strptime(time_work, '%H:%M')
+            except ValueError:
+                raise ValueError("Invalid time format. Please use HH:MM format")
+
+            # Validate time_in is after time_out
+            if time_in_obj <= time_out_obj:
+                raise ValueError("Time in must be after time out")
+
             # Calculate nilai_izin based on time difference in minutes
-            time_out_obj = datetime.strptime(time_out, '%H:%M')
-            time_in_obj = datetime.strptime(time_in, '%H:%M')
             time_diff = time_in_obj - time_out_obj
             nilai_izin = time_diff.total_seconds() / 60
-
             # Update izin record
             izin.date = date
-            izin.time_out = time_out
-            izin.time_in = time_in
+            izin.time_out = datetime.strptime(time_out, '%H:%M').time()
+            izin.time_in = datetime.strptime(time_in, '%H:%M').time() 
+            izin.time_work = datetime.strptime(time_work, '%H:%M').time()
             izin.nilai_izin = nilai_izin
+            izin.potongan = potongan
             izin.save()
 
             # Recalculate slip gaji
@@ -235,12 +245,14 @@ def izin_update(request, pk, slip_gaji_id, penggajian_id):
             return redirect('izin_read', penggajian_id=penggajian_id, slip_gaji_id=slip_gaji_id)
 
         except ValueError as e:
+            return dd(str(e))
             return render(request, 'page/dashboard/izin_keluar_masuk/update.html', {
                 'izin': izin,
                 'slip_gaji': slip_gaji,
                 'error_message': str(e)
             })
         except Exception as e:
+            return dd(str(e))
             return render(request, 'page/dashboard/izin_keluar_masuk/update.html', {
                 'izin': izin,
                 'slip_gaji': slip_gaji,
@@ -263,12 +275,6 @@ def izin_create(request, slip_gaji_id, penggajian_id):
             date = request.POST.get('date')
             time_out = request.POST.get('time_out') 
             time_in = request.POST.get('time_in')
-
-            # Calculate nilai_izin based on time difference in minutes
-            time_out_obj = datetime.strptime(time_out, '%H:%M')
-            time_in_obj = datetime.strptime(time_in, '%H:%M')
-            time_diff = time_in_obj - time_out_obj
-            nilai_izin = time_diff.total_seconds() / 60  # Convert to minutes
             
             if not all([date, time_out, time_in, nilai_izin]):
                 raise ValueError("All fields are required")
@@ -277,8 +283,7 @@ def izin_create(request, slip_gaji_id, penggajian_id):
                 slip_gaji=slip_gaji,
                 date=date,
                 time_out=time_out,
-                time_in=time_in,
-                nilai_izin=nilai_izin
+                time_in=time_in
             )
             
             # Recalculate slip gaji

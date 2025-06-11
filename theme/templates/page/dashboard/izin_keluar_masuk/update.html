@@ -41,7 +41,7 @@
 
           <div>
             <label for="time_out" class="block text-sm font-medium text-gray-700 mb-2">
-              Waktu Keluar<span class="text-red-500">*</span>
+              Jam Izin Keluar<span class="text-red-500">*</span>
             </label>
             <input type="time" 
                    id="time_out" 
@@ -56,7 +56,7 @@
 
           <div>
             <label for="time_in" class="block text-sm font-medium text-gray-700 mb-2">
-              Waktu Masuk<span class="text-red-500">*</span>
+              Jam Izin Masuk<span class="text-red-500">*</span>
             </label>
             <input type="time" 
                    id="time_in" 
@@ -66,6 +66,36 @@
                    class="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 focus:ring-opacity-50 transition-colors duration-200 ease-in-out disabled:bg-gray-100 disabled:cursor-not-allowed">
             {% if form.time_in.errors %}
               <p class="mt-1 text-sm text-red-600">{{ form.time_in.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <div>
+            <label for="time_work" class="block text-sm font-medium text-gray-700 mb-2">
+              Jam Masuk Kerja<span class="text-red-500">*</span>
+            </label>
+            <input type="time" 
+                   id="time_work" 
+                   name="time_work" 
+                   required
+                   value="{{ form.time_work.value|default:izin.time_work|time:'H:i' }}"
+                   class="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 focus:ring-opacity-50 transition-colors duration-200 ease-in-out disabled:bg-gray-100 disabled:cursor-not-allowed">
+            {% if form.time_work.errors %}
+              <p class="mt-1 text-sm text-red-600">{{ form.time_work.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <div>
+            <label for="potongan" class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" 
+                     id="potongan" 
+                     name="potongan"
+                     {% if form.potongan.value|default:izin.potongan %}checked{% endif %}
+                     class="sr-only peer">
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+              <span class="ml-3 text-sm font-medium text-gray-700">Potongan 5%</span>
+            </label>
+            {% if form.potongan.errors %}
+              <p class="mt-1 text-sm text-red-600">{{ form.potongan.errors.0 }}</p>
             {% endif %}
           </div>
         </div>

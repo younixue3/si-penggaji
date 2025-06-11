@@ -1,7 +1,7 @@
 {% extends 'layout/dashboard/base.html' %}
 
 {% block title %}SI-Penggaji - Data Izin Keluar Masuk{% endblock %}
-
+{% load humanize %}
 {% block content %}
 <div class="container mx-auto px-6 py-8">
   <a href="{% url 'slip_gaji_read' penggajian_id %}"
@@ -23,11 +23,11 @@
             <i class="fas fa-search"></i>
           </button>
         </form>
-        <a href="{% url 'izin_create' penggajian_id=penggajian_id slip_gaji_id=slip_gaji.id %}"
+        {% comment %} <a href="{% url 'izin_create' penggajian_id=penggajian_id slip_gaji_id=slip_gaji.id %}"
            class="px-4 py-2 bg-pink-400 text-white rounded hover:bg-pink-500 focus:outline-none focus:ring-2 focus:ring-rose-500 flex items-center">
           <i class="fas fa-plus mr-2"></i>
           Tambah Izin
-        </a>
+        </a> {% endcomment %}
       </div>
     </div>
 
@@ -35,41 +35,62 @@
       <table class="w-full table-auto">
         <thead class="bg-pink-50">
           <tr>
-            <th class="p-4 text-left font-medium text-gray-600">No</th>
-            <th class="p-4 text-left font-medium text-gray-600">Tanggal</th>
-            <th class="p-4 text-left font-medium text-gray-600">Jam Keluar</th>
-            <th class="p-4 text-left font-medium text-gray-600">Jam Masuk</th>
-            <th class="p-4 text-left font-medium text-gray-600">Pegawai</th>
-            <th class="p-4 text-left font-medium text-gray-600">Nilai Izin</th>
-            <th class="p-4 text-left font-medium text-gray-600">Aksi</th>
+            <th class="p-4 text-left font-medium text-gray-600 whitespace-nowrap">No</th>
+            <th class="p-4 text-left font-medium text-gray-600 whitespace-nowrap">Tanggal</th>
+            <th class="p-4 text-left font-medium text-gray-600 whitespace-nowrap">Jam Izin Keluar</th>
+            <th class="p-4 text-left font-medium text-gray-600 whitespace-nowrap">Jam Izin Masuk</th>
+            <th class="p-4 text-left font-medium text-gray-600 whitespace-nowrap">Jam Masuk Kerja</th>
+            <th class="p-4 text-left font-medium text-gray-600 whitespace-nowrap">Pegawai</th>
+            <th class="p-4 text-left font-medium text-gray-600 whitespace-nowrap">Upah Harian</th>
+            <th class="p-4 text-left font-medium text-gray-600 whitespace-nowrap">Aksi</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody class="divide-y divide-gray-200">
           {% for izin in izin_list %}
-          <tr class="border-b hover:bg-pink-50">
-            <td class="p-4">{{ forloop.counter }}</td>
-            <td class="p-4">{{ izin.date|date:"d/m/Y" }}</td>
-            <td class="p-4">{{ izin.time_out|time:"H:i" }}</td>
-            <td class="p-4">{{ izin.time_in|time:"H:i" }}</td>
-            <td class="p-4">{{ izin.slip_gaji.user.username }}</td>
-            <td class="p-4">{{ izin.nilai_izin }}</td>
+          <tr class="hover:bg-pink-50 transition duration-150 ease-in-out">
+            <td class="p-4 text-sm text-gray-900">{{ forloop.counter }}</td>
+            <td class="p-4 text-sm text-gray-900">{{ izin.date|date:"d/m/Y" }}</td>
+            <td class="p-4 text-sm text-gray-900">{{ izin.time_out|time:"g:i A" }}</td>
+            <td class="p-4 text-sm text-gray-900">{{ izin.time_in|time:"g:i A" }}</td>
+            <td class="p-4 text-sm text-gray-900">{{ izin.time_work|time:"g:i A" }}</td>
+            <td class="p-4 text-sm text-gray-900">{{ izin.slip_gaji.user.username }}</td>
+            <td class="p-4 text-sm text-gray-900">
+              <div class="flex items-center">
+                <span>Rp {{ izin.upah_harian|floatformat:0|intcomma }}</span>
+                {% if izin.potongan %}
+                  <span class="ml-1 text-xs text-red-500 font-medium">(5%)</span>
+                {% endif %}
+              </div>
+            </td>
             <td class="p-4">
-              <div class="flex items-center space-x-3">
-                <a href="{% url 'izin_update' pk=izin.id penggajian_id=penggajian_id slip_gaji_id=slip_gaji.id %}" class="text-rose-600 hover:text-rose-800">
+              <div class="flex items-center space-x-4">
+                <a href="{% url 'izin_update' pk=izin.id penggajian_id=penggajian_id slip_gaji_id=slip_gaji.id %}" 
+                   class="text-rose-600 hover:text-rose-800 transition duration-150 ease-in-out"
+                   title="Edit">
                   <i class="fas fa-edit"></i>
                 </a>
-                <form method="POST" action="{% url 'izin_delete' pk=izin.id penggajian_id=penggajian_id slip_gaji_id=slip_gaji.id %}" class="inline" onsubmit="return confirm('Are you sure you want to delete this record?');">
+                {% comment %} <form method="POST" 
+                      action="{% url 'izin_delete' pk=izin.id penggajian_id=penggajian_id slip_gaji_id=slip_gaji.id %}" 
+                      class="inline" 
+                      onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
                   {% csrf_token %}
-                  <button type="submit" class="text-rose-600 hover:text-rose-800 cursor-pointer">
+                  <button type="submit" 
+                          class="text-rose-600 hover:text-rose-800 transition duration-150 ease-in-out"
+                          title="Hapus">
                     <i class="fas fa-trash"></i>
                   </button>
-                </form>
+                </form> {% endcomment %}
               </div>
             </td>
           </tr>
           {% empty %}
           <tr>
-            <td colspan="6" class="p-4 text-center text-gray-500">Tidak ada data izin keluar masuk</td>
+            <td colspan="9" class="p-6 text-center text-gray-500">
+              <div class="flex flex-col items-center justify-center">
+                <i class="fas fa-folder-open text-4xl mb-2"></i>
+                <p>Tidak ada data izin keluar masuk</p>
+              </div>
+            </td>
           </tr>
           {% endfor %}
         </tbody>

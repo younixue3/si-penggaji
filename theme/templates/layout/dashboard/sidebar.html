@@ -1,10 +1,14 @@
-<div class="w-64">
-    <aside class="w-64 h-screen bg-pink-900 text-white fixed left-0 top-0 overflow-y-auto">
+<div class="w-64 transition-all ease-in-out duration-500" id="sidebar">
+    
+    <aside class="w-64 h-screen bg-pink-900 text-white fixed left-0 top-0 overflow-y-auto transition-all ease-in-out duration-500" id="sidebar-content">
         <!-- Brand Logo -->
-        <a href="{% url 'dashboard_page' %}" class="flex items-center px-6 py-4 border-b border-pink-800">
-            {% comment %} <img src="{% static 'img/logo.png' %}" alt="Logo" class="w-8 h-8 rounded-full opacity-80"> {% endcomment %}
-            <span class="ml-3 text-xl font-light">SI-Penggaji</span>
-        </a>
+        <div class="relative flex justify-between">
+            <a href="{% url 'dashboard_page' %}" class="flex items-center px-6 py-4 border-b border-pink-800">
+                {% comment %} <img src="{% static 'img/logo.png' %}" alt="Logo" class="w-8 h-8 rounded-full opacity-80"> {% endcomment %}
+                <span class="ml-3 text-xl font-light">SI-Penggaji</span>
+            </a>
+        </div>
+         
     
         <!-- Sidebar -->
         <div class="py-4">
@@ -44,20 +48,6 @@
                                     <span class="ml-3">Penggajian</span>
                                 </a>
                             </li>
-                            <li>
-                                <a href="{% url 'slip_gaji_read' %}" 
-                                   class="flex items-center px-8 py-2 text-sm {% if request.resolver_match.url_name == 'slip_gaji' %}bg-pink-800 text-white{% else %}text-pink-300 hover:bg-pink-800 hover:text-white{% endif %} transition-colors duration-200">
-                                    <i class="fas fa-receipt w-5 h-5"></i>
-                                    <span class="ml-3">Slip Gaji</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#" 
-                                   class="flex items-center px-8 py-2 text-sm {% if request.resolver_match.url_name == 'izin_keluar' %}bg-pink-800 text-white{% else %}text-pink-300 hover:bg-pink-800 hover:text-white{% endif %} transition-colors duration-200">
-                                    <i class="fas fa-door-open w-5 h-5"></i>
-                                    <span class="ml-3">Izin Keluar</span>
-                                </a>
-                            </li>
                         </ul>
                     </li>
                 </ul>
@@ -65,3 +55,25 @@
         </div>
     </aside>
 </div>
+
+<script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar-content');
+        const sidebarContainer = document.getElementById('sidebar');
+        
+        if (sidebar.classList.contains('w-64')) {
+            // Hide sidebar
+            sidebar.classList.remove('w-64');
+            sidebar.classList.add('w-0');
+            sidebarContainer.classList.remove('w-64');
+            sidebarContainer.classList.add('w-0');
+        } else {
+            // Show sidebar
+            sidebar.classList.remove('w-0');
+            sidebar.classList.add('w-64');
+            sidebarContainer.classList.remove('w-0');
+            sidebarContainer.classList.add('w-64');
+        }
+    }
+
+</script>

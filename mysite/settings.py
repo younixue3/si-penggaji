@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'tailwind',
     'theme',
     'django_browser_reload',
+    'django.contrib.humanize',
     # application
     'penggaji',
     'landingPage',

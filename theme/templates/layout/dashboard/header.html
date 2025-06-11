@@ -1,5 +1,8 @@
 <header class="top-0 left-0 right-0 bg-pink-50 shadow-md z-[1000] transition-all duration-300">
-    <div class="flex justify-end items-center px-8 py-4 h-[70px] max-w-[1920px] mx-auto">
+    <div class="flex justify-between lg:justify-end items-center pl-2 pr-8 py-4 h-[70px] mx-auto">
+        <button id="sidebar-toggle" onclick="toggleSidebar()" class="lg:hidden bg-pink-900 text-white p-2 rounded-lg hover:bg-pink-800 transition-colors duration-200 cursor-pointer">
+            <i class="fas fa-bars"></i>
+        </button>
 
         <!-- Right side -->
         <div class="flex items-center gap-6">
@@ -46,6 +49,10 @@
                     <a class="flex items-center gap-3 px-4 py-2 hover:bg-pink-50 transition-colors duration-200" href="#">
                         <i class="fas fa-cog w-5 text-pink-600"></i>
                         <span class="text-pink-700">Settings</span>
+                    </a>
+                    <a class="flex items-center gap-3 px-4 py-2 hover:bg-pink-50 transition-colors duration-200" href="{% url 'logout' %}">
+                        <i class="fas fa-sign-out-alt w-5 text-pink-600"></i>
+                        <span class="text-pink-700">Logout</span>
                     </a>
                 </div>
             </div>
