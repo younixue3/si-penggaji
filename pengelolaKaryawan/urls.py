@@ -4,6 +4,7 @@ from . import views
 
 urlpatterns = [
     path('', views.pengelolaKaryawan_view, name='pengelolaKaryawan_read'),
-    # path('penggajian/', include('penggaji.urls')),
-    # path('pengelola_staff/', include('pengelola_staff.urls')),
+    path('create/', views.pengelolaKaryawan_create, name='pengelolaKaryawan_create'),
+    path('update/<int:id>/', views.pengelolaKaryawan_update, name='pengelolaKaryawan_update'),
+    path('delete/<int:id>/', views.pengelolaKaryawan_delete, name='pengelolaKaryawan_delete'),
 ]

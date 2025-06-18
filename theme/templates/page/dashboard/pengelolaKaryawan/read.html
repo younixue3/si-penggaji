@@ -1,0 +1,129 @@
+{% extends 'layout/dashboard/base.html' %}
+{% block title %}SI-Penggaji - Data Karyawan{% endblock %}
+{% block content %}
+<div class="container mx-auto px-6 py-8">
+  <div class="bg-white rounded-xl shadow-md">
+    <div class="flex justify-between items-center p-6 border-b">
+      <h3 class="text-lg font-semibold text-gray-800">Data Karyawan</h3>
+      <div class="flex space-x-2">
+        <form class="flex" method="GET">
+          <input type="text" name="search" placeholder="Cari..." value="{{ request.GET.search }}"
+            class="px-4 py-2 border rounded-l focus:outline-none focus:ring-2 focus:ring-pink-500">
+          <button type="submit"
+            class="px-4 py-2 bg-pink-500 text-white rounded-r hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-500">
+            <i class="fas fa-search"></i>
+          </button>
+        </form>
+        <a href="{% url 'pengelolaKaryawan_create' %}" 
+           class="px-4 py-2 bg-pink-400 text-white rounded hover:bg-pink-500 focus:outline-none focus:ring-2 focus:ring-rose-500 flex items-center">
+          <i class="fas fa-plus mr-2"></i>
+          Tambah Karyawan
+        </a>
+      </div>
+    </div>
+
+    <div>
+      <table class="w-full table-auto">
+        <thead class="bg-pink-50">
+          <tr>
+            <th class="p-4 text-left font-medium text-gray-600">No</th>
+            <th class="p-4 text-left font-medium text-gray-600">Nama Lengkap</th>
+            <th class="p-4 text-left font-medium text-gray-600">Username</th>
+            <th class="p-4 text-left font-medium text-gray-600">Login Terakhir</th>
+            <th class="p-4 text-left font-medium text-gray-600">Status Akun</th>
+            <th class="p-4 text-left font-medium text-gray-600">Status Staff</th>
+            <th class="p-4 text-left font-medium text-gray-600">Status Admin</th>
+            <th class="p-4 text-left font-medium text-gray-600">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for karyawan in karyawan_list %}
+          <tr class="border-b hover:bg-pink-50">
+            <td class="p-4">{{ forloop.counter }}</td>
+            <td class="p-4">{{ karyawan.get_full_name }}</td>
+            <td class="p-4">{{ karyawan.username }}</td>
+            <td class="p-4">{{ karyawan.last_login|date:"d/m/Y H:i" }}</td>
+            <td class="p-4">
+              {% if karyawan.is_active %}
+                <span class="px-2 py-1 text-sm font-medium text-green-700 bg-green-100 rounded-full">Aktif</span>
+              {% else %}
+                <span class="px-2 py-1 text-sm font-medium text-red-700 bg-red-100 rounded-full">Non-Aktif</span>
+              {% endif %}
+            </td>
+            <td class="p-4">
+              {% if karyawan.is_staff %}
+                <span class="px-2 py-1 text-sm font-medium text-blue-700 bg-blue-100 rounded-full">Staff</span>
+              {% else %}
+                <span class="px-2 py-1 text-sm font-medium text-gray-700 bg-gray-100 rounded-full">Non-Staff</span>
+              {% endif %}
+            </td>
+            <td class="p-4">
+              {% if karyawan.is_superuser %}
+                <span class="px-2 py-1 text-sm font-medium text-purple-700 bg-purple-100 rounded-full">Admin</span>
+              {% else %}
+                <span class="px-2 py-1 text-sm font-medium text-gray-700 bg-gray-100 rounded-full">User</span>
+              {% endif %}
+            </td>
+            <td class="p-4">
+              <div class="flex items-center space-x-3">
+                {% comment %} <a href="{% url 'karyawan_detail' karyawan.id %}" class="text-blue-600 hover:text-blue-800" title="Detail">
+                  <i class="fas fa-eye"></i>
+                </a> {% endcomment %}
+                <a href="{% url 'pengelolaKaryawan_update' karyawan.id %}" class="text-rose-600 hover:text-rose-800">
+                  <i class="fas fa-edit"></i>
+                </a>
+                <form action="{% url 'pengelolaKaryawan_delete' karyawan.id %}" method="POST" class="inline">
+                  {% csrf_token %}
+                  <button type="submit" class="cursor-pointer text-fuchsia-600 hover:text-fuchsia-800" onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="17" class="p-4 text-center text-gray-500">Tidak ada data karyawan</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if karyawan_list.has_other_pages %}
+    <div class="flex items-center justify-between px-6 py-4 bg-pink-50">
+      <p class="text-sm text-gray-600">
+        Menampilkan {{ karyawan_list.start_index }} - {{ karyawan_list.end_index }} dari {{ karyawan_list.paginator.count }} data
+      </p>
+      
+      <div class="flex items-center space-x-2">
+        {% if karyawan_list.has_previous %}
+        <a href="?page={{ karyawan_list.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" 
+           class="px-4 py-2 text-sm bg-white border rounded-md hover:bg-pink-50">
+          Previous
+        </a>
+        {% endif %}
+
+        {% for num in karyawan_list.paginator.page_range %}
+          {% if karyawan_list.number == num %}
+          <span class="px-4 py-2 text-sm text-white bg-pink-500 rounded-md">{{ num }}</span>
+          {% else %}
+          <a href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+             class="px-4 py-2 text-sm bg-white border rounded-md hover:bg-pink-50">
+            {{ num }}
+          </a>
+          {% endif %}
+        {% endfor %}
+
+        {% if karyawan_list.has_next %}
+        <a href="?page={{ karyawan_list.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+           class="px-4 py-2 text-sm bg-white border rounded-md hover:bg-pink-50">
+          Next
+        </a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
