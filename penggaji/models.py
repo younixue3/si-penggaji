@@ -124,7 +124,7 @@ class SlipGaji(models.Model):
         days_in_month = self.penggajian.days_in_month
         gaji_pokok = self.user.tablegaji.gaji_pokok
         
-        WORK_HOURS_PER_DAY = 11
+        WORK_HOURS_PER_DAY = 14
         minutes_per_day = WORK_HOURS_PER_DAY * 60  # 660 minutes
         
         total_minutes_worked = days_in_month * minutes_per_day
