@@ -1,0 +1,87 @@
+{% extends 'layout/dashboard/base.html' %}
+
+{% block title %}SI-Penggaji - Buat Kasbon Baru{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-6 py-8">
+  <div class="bg-white rounded-xl shadow-md p-6">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">Buat Kasbon Baru</h2>
+
+    <form method="POST" class="space-y-6" novalidate autocomplete="off">
+      {% csrf_token %}
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Date Field -->
+        <div class="form-group">
+          <label for="date" class="block text-sm font-medium text-gray-700 mb-2">
+            Tanggal <span class="text-red-500" aria-hidden="true">*</span>
+          </label>
+          <input type="date" 
+                 id="date" 
+                 name="date" 
+                 required
+                 aria-required="true"
+                 class="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed">
+        </div>
+
+        <!-- Kasbon Amount Field -->
+        <div class="form-group">
+          <label for="nilai_kasbon" class="block text-sm font-medium text-gray-700 mb-2">
+            Nilai Kasbon <span class="text-red-500">*</span>
+          </label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
+              Rp
+            </span>
+            <input type="text"
+                   id="nilai_kasbon"
+                   name="nilai_kasbon"
+                   required
+                   aria-required="true"
+                   placeholder="0"
+                   class="w-full pl-10 pr-3 py-2 rounded-lg border-2 border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 transition duration-200"
+                   pattern="[0-9,]*"
+                   inputmode="numeric"
+                   oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+                   onblur="if(!this.value) this.value='0';"
+                   onfocus="if(this.value==='0') this.value='';">
+          </div>
+        </div>
+      </div>
+
+      <!-- Description Field -->
+      <div class="form-group">
+        <label for="keterangan" class="block text-sm font-medium text-gray-700 mb-2">
+          Keterangan <span class="text-red-500">*</span>
+        </label>
+        <textarea id="keterangan"
+                  name="keterangan"
+                  required
+                  aria-required="true"
+                  rows="4"
+                  placeholder="Masukkan keterangan kasbon"
+                  class="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"></textarea>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="flex justify-end space-x-4 pt-6">
+        <a href="{% url 'kasbon_read' user.id %}" 
+           class="px-6 py-2.5 border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition duration-200 flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+           role="button">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+          Batal
+        </a>
+        <button type="submit" 
+                class="px-6 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition duration-200 flex items-center disabled:opacity-50 disabled:cursor-not-allowed">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          Simpan Kasbon
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

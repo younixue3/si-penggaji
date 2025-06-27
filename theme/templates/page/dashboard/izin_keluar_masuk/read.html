@@ -11,8 +11,14 @@
   </a>
   <div class="bg-white rounded-xl shadow-md">
     <div class="flex justify-between items-center p-6 border-b">
+      <!-- Tambahkan di bawah judul, di dalam div class="flex items-center space-x-4" -->
       <div class="flex items-center space-x-4">
         <h3 class="text-lg font-semibold text-gray-800">Data Izin Keluar Masuk</h3>
+        <a href="{% url 'slip_gaji_pdf' penggajian_id=penggajian_id slip_gaji_id=slip_gaji.id %}" 
+           class="px-4 py-2 bg-pink-400 text-white rounded hover:bg-pink-500 focus:outline-none focus:ring-2 focus:ring-rose-500 flex items-center">
+          <i class="fas fa-file-pdf mr-2"></i>
+          Download PDF
+        </a>
       </div>
       <div class="flex space-x-2">
         <form class="flex" method="GET">
@@ -42,7 +48,9 @@
             <th class="p-4 text-left font-medium text-gray-600 whitespace-nowrap">Jam Masuk Kerja</th>
             <th class="p-4 text-left font-medium text-gray-600 whitespace-nowrap">Pegawai</th>
             <th class="p-4 text-left font-medium text-gray-600 whitespace-nowrap">Upah Harian</th>
-            <th class="p-4 text-left font-medium text-gray-600 whitespace-nowrap">Aksi</th>
+            {% if penggajian.status != 'done' %}
+              <th class="p-4 text-left font-medium text-gray-600 whitespace-nowrap">Aksi</th>
+            {% endif %}
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200">
@@ -62,26 +70,28 @@
                 {% endif %}
               </div>
             </td>
+            {% if penggajian.status != 'done' %}
             <td class="p-4">
-              <div class="flex items-center space-x-4">
-                <a href="{% url 'izin_update' pk=izin.id penggajian_id=penggajian_id slip_gaji_id=slip_gaji.id %}" 
-                   class="text-rose-600 hover:text-rose-800 transition duration-150 ease-in-out"
-                   title="Edit">
-                  <i class="fas fa-edit"></i>
-                </a>
-                {% comment %} <form method="POST" 
-                      action="{% url 'izin_delete' pk=izin.id penggajian_id=penggajian_id slip_gaji_id=slip_gaji.id %}" 
-                      class="inline" 
-                      onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
-                  {% csrf_token %}
-                  <button type="submit" 
-                          class="text-rose-600 hover:text-rose-800 transition duration-150 ease-in-out"
-                          title="Hapus">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </form> {% endcomment %}
-              </div>
-            </td>
+                <div class="flex items-center space-x-4">
+                  <a href="{% url 'izin_update' pk=izin.id penggajian_id=penggajian_id slip_gaji_id=slip_gaji.id %}" 
+                    class="text-rose-600 hover:text-rose-800 transition duration-150 ease-in-out"
+                    title="Edit">
+                    <i class="fas fa-edit"></i>
+                  </a>
+                  {% comment %} <form method="POST" 
+                        action="{% url 'izin_delete' pk=izin.id penggajian_id=penggajian_id slip_gaji_id=slip_gaji.id %}" 
+                        class="inline" 
+                        onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
+                    {% csrf_token %}
+                    <button type="submit" 
+                            class="text-rose-600 hover:text-rose-800 transition duration-150 ease-in-out"
+                            title="Hapus">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </form> {% endcomment %}
+                </div>
+              </td>
+            {% endif %}
           </tr>
           {% empty %}
           <tr>

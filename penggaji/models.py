@@ -142,7 +142,10 @@ class SlipGaji(models.Model):
         return self.upah_per_menit
 
     def calculate_gaji_bersih(self):
-        self.gaji_bersih = self.izin_list.aggregate(total=models.Sum('upah_harian'))['total'] or 0
+
+        total_kasbon = self.user.kasbon_set.filter(status='diterima').aggregate(total=models.Sum('nilai_kasbon'))['total'] or 0
+
+        self.gaji_bersih = self.izin_list.aggregate(total=models.Sum('upah_harian'))['total'] - total_kasbon or 0 
         return self.gaji_bersih
 
     def create_izin_masuk(self):
@@ -261,29 +264,12 @@ class IzinKeluarMasuk(models.Model):
         self.slip_gaji.calculate_gaji_bersih()
         self.slip_gaji.save(update_fields=['gaji_bersih'])
 
-# # Signal handlers for automatic gaji bersih calculation
-# @receiver(post_save, sender=IzinKeluarMasuk)
-# def update_gaji_bersih_on_izin_save(sender, instance, **kwargs):
-#     """
-#     Automatically recalculate gaji_bersih when IzinKeluarMasuk is saved.
-#     """
-#     slip_gaji = instance.slip_gaji
-#     slip_gaji.calculate_gaji_bersih()
-#     slip_gaji.save(update_fields=['gaji_bersih'])
-
-# @receiver(post_delete, sender=IzinKeluarMasuk)
-# def update_gaji_bersih_on_izin_delete(sender, instance, **kwargs):
-#     """
-#     Automatically recalculate gaji_bersih when IzinKeluarMasuk is deleted.
-#     """
-#     slip_gaji = instance.slip_gaji
-#     slip_gaji.calculate_gaji_bersih()
-#     slip_gaji.save(update_fields=['gaji_bersih'])
-
-# @receiver(post_save, sender=Penggajian)
-# def create_izin_keluar_masuk_on_penggajian_save(sender, instance, created, **kwargs):
-#     if created:  # Only run for newly created instances
-#         for slip_gaji in instance.slip_gaji.all():
-#             slip_gaji.create_izin_masuk()
-#             slip_gaji.calculate_gaji_bersih()
-#             slip_gaji.save(update_fields=['gaji_bersih'])
+class Kasbon(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    slip_gaji = models.ForeignKey(SlipGaji, on_delete=models.CASCADE, null=True, blank=True)
+    date = models.DateField(null=True, blank=True)
+    keterangan = models.TextField(null=True, blank=True)
+    status = models.CharField(max_length=20, choices=[('diterima', 'Diterima'), ('ditolak', 'Ditolak'), ('pending', 'Pending'), ('selesai', 'Selesai')], default='pending')
+    nilai_kasbon = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

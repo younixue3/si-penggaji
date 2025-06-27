@@ -1,0 +1,95 @@
+{% extends 'layout/dashboard/base.html' %}
+{% block title %}SI-Penggaji - Data Kasbon {{ user.get_full_name }}{% endblock %}
+{% load humanize %}
+{% block content %}
+<div class="container mx-auto px-6 py-8">
+  <div class="bg-white rounded-xl shadow-md">
+    <div class="flex justify-between items-center p-6 border-b">
+      <h3 class="text-lg font-semibold text-gray-800">Data Kasbon - {{ user.get_full_name }}</h3>
+      <div class="flex space-x-2">
+        <a href="{% url 'kasbon_create' user_id=user.id %}" 
+           class="px-4 py-2 bg-pink-400 text-white rounded hover:bg-pink-500 focus:outline-none focus:ring-2 focus:ring-rose-500 flex items-center">
+          <i class="fas fa-plus mr-2"></i>
+          Tambah Kasbon
+        </a>
+      </div>
+    </div>
+
+    <div>
+      <table class="w-full table-auto">
+        <thead class="bg-pink-50">
+          <tr>
+            <th class="p-4 text-left font-medium text-gray-600">No</th>
+            <th class="p-4 text-left font-medium text-gray-600">Tanggal</th>
+            <th class="p-4 text-left font-medium text-gray-600">Keterangan</th>
+            <th class="p-4 text-left font-medium text-gray-600">Nilai Kasbon</th>
+            <th class="p-4 text-left font-medium text-gray-600">Status</th>
+            <th class="p-4 text-left font-medium text-gray-600">Aksi</th>
+            <th class="p-4 text-left font-medium text-gray-600">#</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for kasbon in kasbons %}
+          <tr class="border-b hover:bg-pink-50">
+            <td class="p-4">{{ forloop.counter }}</td>
+            <td class="p-4">{{ kasbon.date|date:"d/m/Y" }}</td>
+            <td class="p-4">{{ kasbon.keterangan }}</td>
+            <td class="p-4">Rp {{ kasbon.nilai_kasbon|floatformat:0|intcomma }}</td>
+            <td class="p-4">
+              {% if kasbon.status == 'diterima' %}
+                <span class="px-2 py-1 text-sm font-medium text-green-700 bg-green-100 rounded-full">Diterima</span>
+              {% elif kasbon.status == 'ditolak' %}
+                <span class="px-2 py-1 text-sm font-medium text-red-700 bg-red-100 rounded-full">Ditolak</span>
+              {% elif kasbon.status == 'selesai' %}
+                <span class="px-2 py-1 text-sm font-medium text-blue-700 bg-blue-100 rounded-full">Selesai</span>
+              {% else %}
+                <span class="px-2 py-1 text-sm font-medium text-yellow-700 bg-yellow-100 rounded-full">Pending</span>
+              {% endif %}
+            </td>
+            <td class="p-4">
+              {% if kasbon.status != 'done' %}
+                <div class="flex items-center space-x-3">
+                  <a href="{% url 'kasbon_update' user_id=user.id pk=kasbon.id %}" class="text-rose-600 hover:text-rose-800">
+                    <i class="fas fa-edit"></i>
+                  </a>
+                  <form action="{% url 'kasbon_delete' user_id=user.id pk=kasbon.id %}" method="POST" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" class="cursor-pointer text-fuchsia-600 hover:text-fuchsia-800" onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </form>
+                </div>
+              {% endif %}
+            </td>
+            <td>
+              {% if kasbon.status == 'pending' %}
+                <form action="{% url 'kasbon_update' user_id=user.id pk=kasbon.id %}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menerima kasbon ini?')">
+                  {% csrf_token %}
+                  <input type="hidden" name="approval" value="true">
+                  <input type="hidden" name="status" value="diterima">
+                  <button type="submit" class="px-2 py-1 text-sm font-medium text-green-700 bg-green-100 rounded hover:bg-green-200 cursor-pointer">
+                    <i class="fas fa-check mr-1"></i>Terima
+                  </button>
+                </form>
+                <form action="{% url 'kasbon_update' user_id=user.id pk=kasbon.id %}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menolak kasbon ini?')">
+                  {% csrf_token %}
+                  <input type="hidden" name="approval" value="true">
+                  <input type="hidden" name="status" value="ditolak">
+                  <button type="submit" class="px-2 py-1 text-sm font-medium text-red-700 bg-red-100 rounded hover:bg-red-200 cursor-pointer">
+                    <i class="fas fa-times mr-1"></i>Tolak
+                  </button>
+                </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="p-4 text-center text-gray-500">Tidak ada data kasbon</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

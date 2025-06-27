@@ -16,6 +16,11 @@ urlpatterns = [
     # path('slip_gaji/delete/<int:pk>/', views.slip_gaji_delete, name='slip_gaji_delete'),
     path('<int:penggajian_id>/slip_gaji/<int:slip_gaji_id>/izin_masuk_keluar/', views.izin_read, name='izin_read'),
     path('<int:penggajian_id>/slip_gaji/<int:slip_gaji_id>/izin_masuk_keluar/<int:pk>/update/', views.izin_update, name='izin_update'),
+    path('<int:penggajian_id>/slip_gaji/<int:slip_gaji_id>/pdf/', views.generate_slip_gaji_pdf, name='slip_gaji_pdf'),
     # path('<int:penggajian_id>/slip_gaji/<int:slip_gaji_id>/izin_masuk_keluar/<int:pk>/delete/', views.izin_delete, name='izin_delete'),
     # path('<int:penggajian_id>/slip_gaji/<int:slip_gaji_id>/izin_masuk_keluar/create/', views.izin_create, name='izin_create'),
+    path('kasbon/<int:user_id>/', views.kasbon_read, name='kasbon_read'),
+    path('kasbon/<int:user_id>/create/', views.kasbon_create, name='kasbon_create'),
+    path('kasbon/<int:user_id>/<int:pk>/update/', views.kasbon_update, name='kasbon_update'),
+    path('kasbon/<int:user_id>/<int:pk>/delete/', views.kasbon_delete, name='kasbon_delete'),
 ]
