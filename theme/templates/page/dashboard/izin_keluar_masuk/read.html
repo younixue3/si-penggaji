@@ -55,14 +55,14 @@
         </thead>
         <tbody class="divide-y divide-gray-200">
           {% for izin in izin_list %}
-          <tr class="hover:bg-pink-50 transition duration-150 ease-in-out">
-            <td class="p-4 text-sm text-gray-900">{{ forloop.counter }}</td>
-            <td class="p-4 text-sm text-gray-900">{{ izin.date|date:"d/m/Y" }}</td>
-            <td class="p-4 text-sm text-gray-900">{{ izin.time_out|time:"g:i A" }}</td>
-            <td class="p-4 text-sm text-gray-900">{{ izin.time_in|time:"g:i A" }}</td>
-            <td class="p-4 text-sm text-gray-900">{{ izin.time_work|time:"g:i A" }}</td>
-            <td class="p-4 text-sm text-gray-900">{{ izin.slip_gaji.user.username }}</td>
-            <td class="p-4 text-sm text-gray-900">
+          <tr class="transition duration-150 ease-in-out {% if izin.status_off %}bg-red-700 text-white{% elif izin.upah_harian > 0 and not izin.status_off %}bg-green-200 text-gray-900{% else %}hover:bg-pink-50 text-gray-900{% endif %}">
+            <td class="p-4 text-sm">{{ forloop.counter }}</td>
+            <td class="p-4 text-sm">{{ izin.date|date:"d/m/Y" }}</td>
+            <td class="p-4 text-sm">{{ izin.time_out|time:"g:i A" }}</td>
+            <td class="p-4 text-sm">{{ izin.time_in|time:"g:i A" }}</td>
+            <td class="p-4 text-sm">{{ izin.time_work|time:"g:i A" }}</td>
+            <td class="p-4 text-sm">{{ izin.slip_gaji.user.username }}</td>
+            <td class="p-4 text-sm">
               <div class="flex items-center">
                 <span>Rp {{ izin.upah_harian|floatformat:0|intcomma }}</span>
                 {% if izin.potongan %}
@@ -70,28 +70,37 @@
                 {% endif %}
               </div>
             </td>
-            {% if penggajian.status != 'done' %}
             <td class="p-4">
-                <div class="flex items-center space-x-4">
-                  <a href="{% url 'izin_update' pk=izin.id penggajian_id=penggajian_id slip_gaji_id=slip_gaji.id %}" 
-                    class="text-rose-600 hover:text-rose-800 transition duration-150 ease-in-out"
-                    title="Edit">
-                    <i class="fas fa-edit"></i>
-                  </a>
-                  {% comment %} <form method="POST" 
-                        action="{% url 'izin_delete' pk=izin.id penggajian_id=penggajian_id slip_gaji_id=slip_gaji.id %}" 
-                        class="inline" 
-                        onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
-                    {% csrf_token %}
-                    <button type="submit" 
-                            class="text-rose-600 hover:text-rose-800 transition duration-150 ease-in-out"
-                            title="Hapus">
-                      <i class="fas fa-trash"></i>
-                    </button>
-                  </form> {% endcomment %}
-                </div>
-              </td>
-            {% endif %}
+                {% if penggajian.status != 'done' %}
+                 {% if izin.status_off == False %}
+                 <div class="flex items-center space-x-4">
+                   <a href="{% url 'izin_update' pk=izin.id penggajian_id=penggajian_id slip_gaji_id=slip_gaji.id %}" 
+                     class="text-rose-600 hover:text-rose-800 transition duration-150 ease-in-out"
+                     title="Edit">
+                     <i class="fas fa-edit"></i>
+                   </a>
+                   <form action="{% url 'izin_update' pk=izin.id penggajian_id=penggajian_id slip_gaji_id=slip_gaji.id %}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menerima kasbon ini?')">
+                     {% csrf_token %}
+                     <input type="hidden" name="status_off" value="true">
+                     <button type="submit" class="px-2 py-1 text-sm font-medium text-red-700 bg-red-200 rounded hover:bg-red-300 cursor-pointer transition-colors ease-in-out">
+                       OFF
+                     </button>
+                   </form>
+                   {% comment %} <form method="POST" 
+                         action="{% url 'izin_delete' pk=izin.id penggajian_id=penggajian_id slip_gaji_id=slip_gaji.id %}" 
+                         class="inline" 
+                         onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
+                     {% csrf_token %}
+                     <button type="submit" 
+                             class="text-rose-600 hover:text-rose-800 transition duration-150 ease-in-out"
+                             title="Hapus">
+                       <i class="fas fa-trash"></i>
+                     </button>
+                   </form> {% endcomment %}
+                 </div>
+                 {% endif %}
+                {% endif %}
+               </td>
           </tr>
           {% empty %}
           <tr>

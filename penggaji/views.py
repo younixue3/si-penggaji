@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import Penggajian, SlipGaji, IzinKeluarMasuk, Kasbon, MONTH_CHOICES, STATUS_CHOICES
+from .models import Penggajian, SlipGaji, IzinKeluarMasuk, Kasbon, TableGaji, MONTH_CHOICES, STATUS_CHOICES
 from django.contrib.auth.models import User
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter, portrait
@@ -31,6 +31,8 @@ def penggajian_create(request):
             days_in_month = request.POST.get('days_in_month')
             month = request.POST.get('month')
             status = request.POST.get('status')
+            date_form = request.POST.get('date_from')
+            date_to = request.POST.get('date_to')
 
             if not all([days_in_month, month, status]):
                 messages.error(request, "All fields are required")
@@ -46,7 +48,7 @@ def penggajian_create(request):
                 last_penggajian.save()
                 
                 # Update all accepted kasbons to completed status
-                accepted_kasbons = Kasbon.objects.filter(status__in=['diterima', 'ditolak'])
+                accepted_kasbons = Kasbon.objects.filter(status__in=['diterima'])
                 for kasbon in accepted_kasbons:
                     user = kasbon.user
                     slip_gaji = SlipGaji.objects.filter(penggajian=last_penggajian, user=user).first()
@@ -76,6 +78,7 @@ def penggajian_create(request):
                 'status_list': STATUS_CHOICES
             })
         except Exception as e:
+            return dd(e)
             messages.error(request, "An error occurred while creating the record")
             return render(request, 'page/dashboard/penggajian/create.html', {
                 'month_list': MONTH_CHOICES,
@@ -244,44 +247,48 @@ def izin_update(request, pk, slip_gaji_id, penggajian_id):
             time_in = request.POST.get('time_in')
             time_work = request.POST.get('time_work')
             potongan = True if request.POST.get('potongan') == 'on' else False
+            status_off = True if request.POST.get('status_off') == 'true' else False
 
-            if not all([date, time_out, time_in, time_work]):
-                messages.error(request, "All fields are required")
-                return render(request, 'page/dashboard/izin_keluar_masuk/update.html', {
-                    'izin': izin,
-                    'slip_gaji': slip_gaji
-                })
+            if status_off:
+                izin.status_off = status_off
 
-            try:
-                time_out_obj = datetime.strptime(time_out, '%H:%M')
-                time_in_obj = datetime.strptime(time_in, '%H:%M')
-                time_work_obj = datetime.strptime(time_work, '%H:%M')
-            except ValueError:
-                messages.error(request, "Invalid time format. Please use HH:MM format")
-                return render(request, 'page/dashboard/izin_keluar_masuk/update.html', {
-                    'izin': izin,
-                    'slip_gaji': slip_gaji
-                })
+            else:
+                if not all([date, time_out, time_in, time_work]):
+                    messages.error(request, "All fields are required")
+                    return render(request, 'page/dashboard/izin_keluar_masuk/update.html', {
+                        'izin': izin,
+                        'slip_gaji': slip_gaji
+                    })
 
-            if time_in_obj <= time_out_obj:
-                messages.error(request, "Time in must be after time out")
-                return render(request, 'page/dashboard/izin_keluar_masuk/update.html', {
-                    'izin': izin,
-                    'slip_gaji': slip_gaji
-                })
+                try:
+                    time_out_obj = datetime.strptime(time_out, '%H:%M')
+                    time_in_obj = datetime.strptime(time_in, '%H:%M')
+                    time_work_obj = datetime.strptime(time_work, '%H:%M')
+                except ValueError:
+                    messages.error(request, "Invalid time format. Please use HH:MM format")
+                    return render(request, 'page/dashboard/izin_keluar_masuk/update.html', {
+                        'izin': izin,
+                        'slip_gaji': slip_gaji
+                    })
 
-            time_diff = time_in_obj - time_out_obj
-            nilai_izin = time_diff.total_seconds() / 60
+                if time_in_obj <= time_out_obj:
+                    messages.error(request, "Time in must be after time out")
+                    return render(request, 'page/dashboard/izin_keluar_masuk/update.html', {
+                        'izin': izin,
+                        'slip_gaji': slip_gaji
+                    })
 
-            izin.date = date
-            izin.time_out = datetime.strptime(time_out, '%H:%M').time()
-            izin.time_in = datetime.strptime(time_in, '%H:%M').time() 
-            izin.time_work = datetime.strptime(time_work, '%H:%M').time()
-            izin.nilai_izin = nilai_izin
-            izin.potongan = potongan
+                time_diff = time_in_obj - time_out_obj
+                nilai_izin = time_diff.total_seconds() / 60
+
+                izin.date = date
+                izin.time_out = datetime.strptime(time_out, '%H:%M').time()
+                izin.time_in = datetime.strptime(time_in, '%H:%M').time() 
+                izin.time_work = datetime.strptime(time_work, '%H:%M').time()
+                izin.nilai_izin = nilai_izin
+                izin.potongan = potongan
+
             izin.save()
-
-            slip_gaji.save()
             
             messages.success(request, 'Izin updated successfully')
             return redirect('izin_read', penggajian_id=penggajian_id, slip_gaji_id=slip_gaji_id)
@@ -461,7 +468,6 @@ def kasbon_update(request, pk, user_id):
         except ValueError as e:
             messages.error(request, "Please enter valid numeric values for nilai kasbon")
         except Exception as e:
-            return dd(e)
             messages.error(request, "An error occurred while updating the record")
 
     return render(request, 'page/dashboard/kasbon/update.html', {
@@ -550,9 +556,12 @@ def generate_slip_gaji_pdf(request, penggajian_id, slip_gaji_id):
     # Header with company logo placeholder
     elements.append(Paragraph("SLIP GAJI", styles['CustomTitle']))
     elements.append(Paragraph(f"Periode: {penggajian.month}", styles['Subtitle']))
+
+    gaji = TableGaji.objects.get(user=slip_gaji.user)
     
     # Employee information in a more structured format
-    elements.append(Paragraph(f"Nama Karyawan: {slip_gaji.user.get_full_name() or slip_gaji.user.username}", styles['EmployeeInfo']))
+    elements.append(Paragraph(f"Nama: {slip_gaji.user.get_full_name() or slip_gaji.user.username}", styles['EmployeeInfo']))
+    elements.append(Paragraph(f"Gaji: Rp {gaji.gaji_pokok:,.0f}", styles['EmployeeInfo']))
     elements.append(Paragraph(f"Tanggal Cetak: {datetime.now().strftime('%d/%m/%Y')}", styles['EmployeeInfo']))
     elements.append(Spacer(1, 0.3*inch))
     
@@ -562,23 +571,8 @@ def generate_slip_gaji_pdf(request, penggajian_id, slip_gaji_id):
         ['No', 'Tanggal', 'Jam Izin Keluar', 'Jam Izin Masuk', 'Jam Masuk Kerja', 'Upah Harian', 'Potongan']
     ]
     
-    for i, izin in enumerate(izin_list, 1):
-        potongan_text = "5%" if izin.potongan else "-"
-        data.append([
-            i,
-            izin.date.strftime('%d/%m/%Y') if izin.date else "-",
-            izin.time_out.strftime('%H:%M') if izin.time_out else "-",
-            izin.time_in.strftime('%H:%M') if izin.time_in else "-",
-            izin.time_work.strftime('%H:%M') if izin.time_work else "-",
-            f"Rp {izin.upah_harian:,.0f}",
-            potongan_text
-        ])
-    
-    data.append(['', '', '', '', 'Total Upah Harian', f"Rp {total_upah_harian:,.0f}", ''])
-    
-    # Enhanced table styling for izin
-    table = Table(data, colWidths=[0.5*inch, 1.2*inch, 1.3*inch, 1.3*inch, 1.3*inch, 1.5*inch, 0.8*inch])
-    table_style = TableStyle([
+    # Initialize table style commands
+    table_style_commands = [
         # Header styling
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1a237e')),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
@@ -605,9 +599,33 @@ def generate_slip_gaji_pdf(request, penggajian_id, slip_gaji_id):
         ('BOX', (0, -1), (-1, -1), 1, colors.HexColor('#1a237e')),
         ('LINEABOVE', (0, -1), (-1, -1), 1, colors.HexColor('#1a237e')),
         ('ALIGN', (5, 1), (5, -1), 'RIGHT'),
-    ])
+    ]
     
-    table.setStyle(table_style)
+    for i, izin in enumerate(izin_list, 1):
+        potongan_text = "5%" if izin.potongan else "-"
+        
+        row_data = [
+            i,
+            izin.date.strftime('%d/%m/%Y') if izin.date else "-",
+            izin.time_out.strftime('%H:%M') if izin.time_out else "-",
+            izin.time_in.strftime('%H:%M') if izin.time_in else "-",
+            izin.time_work.strftime('%H:%M') if izin.time_work else "-",
+            f"Rp {izin.upah_harian:,.0f}",
+            potongan_text
+        ]
+        data.append(row_data)
+        
+        if izin.status_off:
+            table_style_commands.append(
+                ('BACKGROUND', (0, len(data)-1), (-1, len(data)-1), colors.pink)
+            )
+    
+    data.append(['', '', '', '', 'Total Upah Harian', f"Rp {total_upah_harian:,.0f}", ''])
+    
+    # Enhanced table styling for izin
+    table = Table(data, colWidths=[0.5*inch, 1.2*inch, 1.2*inch, 1.2*inch, 1.2*inch, 1.5*inch, 0.8*inch])
+    table.setStyle(TableStyle(table_style_commands))
+    
     elements.append(table)
     elements.append(Spacer(1, 0.5*inch))
 

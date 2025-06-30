@@ -2,6 +2,10 @@ import pprint
 import json
 from django.http import HttpResponse
 from django.utils.html import escape
+from django.contrib.auth.decorators import user_passes_test
+from django.shortcuts import redirect
+from django.contrib import messages
+from functools import wraps
 
 def dd(*args):
     html = """
@@ -65,3 +69,17 @@ def dd(*args):
 
     html += "</div></body></html>"
     return HttpResponse(html)
+
+
+def superuser_required(view_func):
+    """Decorator to restrict access to superusers only"""
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            messages.error(request, "Anda harus login terlebih dahulu.")
+            return redirect('login')
+        if not request.user.is_superuser:
+            messages.error(request, "Anda tidak memiliki akses ke halaman ini. Hanya super admin yang diizinkan.")
+            return redirect('dashboard_page')
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view

@@ -1,0 +1,64 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}404 - SI-Penggaji{% endblock %}
+{% block meta_description %}404 Page Not Found{% endblock %}
+{% block meta_keywords %}404, not found{% endblock %}
+{% block meta_author %}SI-Penggaji{% endblock %}
+
+{% block og_title %}404 - SI-Penggaji{% endblock %}
+{% block og_description %}404 Page Not Found{% endblock %}
+{% block og_image %}{% endblock %}
+
+{% block twitter_title %}404 - SI-Penggaji{% endblock %}
+{% block twitter_description %}404 Page Not Found{% endblock %}
+{% block twitter_image %}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-r from-pink-50 to-purple-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full text-center">
+    <!-- 404 Illustration -->
+    <div class="mb-8 relative">
+      <i class="fas fa-exclamation-triangle text-9xl text-purple-500 opacity-80"></i>
+      <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+        <span class="text-9xl font-extrabold text-purple-800 opacity-10">404</span>
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    <div class="mb-8">
+      <h1 class="text-4xl sm:text-5xl font-extrabold text-purple-800 mb-4 animate-fade-in">
+        Halaman Tidak Ditemukan
+      </h1>
+      <p class="text-xl text-purple-600 mb-8">
+        Maaf, halaman yang Anda cari tidak dapat ditemukan atau telah dipindahkan.
+      </p>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <a
+        href="/"
+        class="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
+      >
+        <i class="fas fa-home mr-2"></i>
+        Kembali ke Beranda
+      </a>
+      <button
+        onclick="history.back()"
+        class="inline-flex items-center justify-center px-8 py-3 border-2 border-purple-500 text-base font-medium rounded-xl text-purple-700 bg-transparent hover:bg-purple-50 transition-all duration-300 transform hover:scale-105"
+      >
+        <i class="fas fa-arrow-left mr-2"></i>
+        Halaman Sebelumnya
+      </button>
+    </div>
+
+    <!-- Help Text -->
+    <p class="mt-8 text-purple-600">
+      Butuh bantuan? 
+      <a href="/contact" class="text-pink-500 hover:text-pink-600 font-medium">
+        Hubungi kami
+      </a>
+    </p>
+  </div>
+</div>
+{% endblock %}

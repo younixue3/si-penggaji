@@ -53,6 +53,14 @@ class Penggajian(models.Model):
         default='progress',
         help_text="Current status of the payroll processing"
     )
+    date_from = models.DateField(
+        null=True, 
+        blank=True
+    )
+    date_to = models.DateField(
+        null=True, 
+        blank=True
+    )
     created_at = models.DateTimeField(
         auto_now_add=True,
         help_text="Timestamp when record was created"
@@ -162,15 +170,22 @@ class SlipGaji(models.Model):
         month_num = datetime.strptime(month_name, '%B').month
         
         # Create date range from 5th to days_in_month
-        start_date = datetime(current_year, month_num, 5)
-        end_date = start_date + timedelta(days=self.penggajian.days_in_month)  # Subtract 5 to account for starting from 5th
-        
-        # Generate list of dates
-        date_list = []
-        current_date = start_date
-        while current_date <= end_date:
-            date_list.append(current_date.date())
-            current_date += timedelta(days=1)
+        if self.penggajian.date_from and self.penggajian.date_to:
+            date_list = []
+            current_date = self.penggajian.date_from
+            while current_date <= self.penggajian.date_to:
+                date_list.append(current_date)
+                current_date += timedelta(days=1)
+        else:
+            start_date = datetime(current_year, month_num, 5)
+            end_date = start_date + timedelta(days=self.penggajian.days_in_month)  # Subtract 5 to account for starting from 5th
+            
+            # Generate list of dates
+            date_list = []
+            current_date = start_date
+            while current_date <= end_date:
+                date_list.append(current_date.date())
+                current_date += timedelta(days=1)
 
         # Create IzinKeluarMasuk objects for each date
         izin_masuk_objects = [
@@ -210,6 +225,7 @@ class IzinKeluarMasuk(models.Model):
     time_work = models.TimeField(blank=True, default=time(0, 0))
     upah_harian = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     potongan = models.BooleanField(default=False)
+    status_off = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['date']
@@ -239,6 +255,9 @@ class IzinKeluarMasuk(models.Model):
 
         if self.potongan:
             upah_harian = upah_harian * Decimal('0.95')  # Apply 5% discount
+        
+        if self.status_off:
+            upah_harian = 0
 
         self.upah_harian = upah_harian
 
