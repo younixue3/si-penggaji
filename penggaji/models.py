@@ -178,7 +178,7 @@ class SlipGaji(models.Model):
                 current_date += timedelta(days=1)
         else:
             start_date = datetime(current_year, month_num, 5)
-            end_date = start_date + timedelta(days=self.penggajian.days_in_month)  # Subtract 5 to account for starting from 5th
+            end_date = start_date + timedelta(days=self.penggajian.days_in_month - 1)  # Subtract 5 to account for starting from 5th
             
             # Generate list of dates
             date_list = []

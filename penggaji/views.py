@@ -78,7 +78,6 @@ def penggajian_create(request):
                 'status_list': STATUS_CHOICES
             })
         except Exception as e:
-            return dd(e)
             messages.error(request, "An error occurred while creating the record")
             return render(request, 'page/dashboard/penggajian/create.html', {
                 'month_list': MONTH_CHOICES,
