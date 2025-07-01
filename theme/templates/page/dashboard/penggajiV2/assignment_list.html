@@ -1,0 +1,68 @@
+{% extends 'layout/dashboard/base.html' %}
+{% block title %}SI-Penggaji - Daftar Penugasan Template{% endblock %}
+{% block content %}
+<div class="container mx-auto px-6 py-8">
+  <div class="bg-white rounded-xl shadow-md">
+    <div class="flex justify-between items-center p-6 border-b">
+      <h3 class="text-lg font-semibold text-gray-800">Daftar Penugasan Template Perhitungan Gaji</h3>
+      <div class="flex space-x-2">
+        <a href="{% url 'penggajiV2:assignment_create' %}" 
+           class="px-4 py-2 bg-pink-400 text-white rounded hover:bg-pink-500 focus:outline-none focus:ring-2 focus:ring-rose-500 flex items-center">
+          <i class="fas fa-plus mr-2"></i>
+          Tambah Penugasan
+        </a>
+      </div>
+    </div>
+
+    <div>
+      <table class="w-full table-auto">
+        <thead class="bg-pink-50">
+          <tr>
+            <th class="p-4 text-left font-medium text-gray-600">No</th>
+            <th class="p-4 text-left font-medium text-gray-600">Pengguna</th>
+            <th class="p-4 text-left font-medium text-gray-600">Template</th>
+            <th class="p-4 text-left font-medium text-gray-600">Status</th>
+            <th class="p-4 text-left font-medium text-gray-600">Tanggal Dibuat</th>
+            <th class="p-4 text-left font-medium text-gray-600">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for assignment in assignments %}
+          <tr class="border-b hover:bg-pink-50">
+            <td class="p-4">{{ forloop.counter }}</td>
+            <td class="p-4">{{ assignment.user.username }}</td>
+            <td class="p-4">{{ assignment.template.name }}</td>
+            <td class="p-4">
+              {% if assignment.is_active %}
+                <span class="px-2 py-1 text-sm font-medium text-green-700 bg-green-100 rounded-full">Aktif</span>
+              {% else %}
+                <span class="px-2 py-1 text-sm font-medium text-red-700 bg-red-100 rounded-full">Tidak Aktif</span>
+              {% endif %}
+            </td>
+            <td class="p-4">{{ assignment.created_at|date:"d M Y" }}</td>
+            <td class="p-4">
+              <div class="flex space-x-2">
+                <a href="{% url 'penggajiV2:calculation_form' assignment_id=assignment.id %}" 
+                   class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                  <i class="fas fa-calculator mr-1"></i> Hitung
+                </a>
+                <a href="{% url 'penggajiV2:assignment_delete' assignment_id=assignment.id %}" 
+                   class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300">
+                  <i class="fas fa-trash mr-1"></i> Hapus
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="p-4 text-center text-gray-500">
+              Belum ada penugasan template. Silakan tambahkan penugasan baru.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,725 @@
+{% extends 'layout/dashboard/base.html' %}
+
+{% block title %}SI-Penggaji - Editor Langkah Perhitungan{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsPlumb/2.15.6/css/jsplumbtoolkit-defaults.min.css" />
+<style>
+  .calculation-canvas {
+    position: relative;
+    height: 600px;
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    overflow: auto;
+  }
+  .step-node {
+    position: absolute;
+    width: 220px;
+    background-color: white;
+    border: 2px solid #d1d5db;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    z-index: 10;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  }
+  .step-node.selected {
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+  }
+  .step-node .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+  .step-node .title {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #4b5563;
+  }
+  .step-node .content {
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
+  .step-node .endpoint {
+    width: 12px;
+    height: 12px;
+    background-color: #8b5cf6;
+    border-radius: 50%;
+    position: absolute;
+  }
+  .step-node .input-endpoint {
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .step-node .output-endpoint {
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .step-node .true-endpoint {
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #10b981;
+  }
+  .step-node .false-endpoint {
+    left: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #ef4444;
+  }
+  .toolbar {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .properties-panel {
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 1rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-6 py-8">
+  <div class="bg-white rounded-xl shadow-md p-6">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-2xl font-bold text-gray-800">Editor Langkah Perhitungan</h2>
+      <div>
+        <a href="{% url 'penggajiV2:template_detail' template.id %}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition duration-200 mr-2">
+          Kembali
+        </a>
+        <button id="save-button" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition duration-200">
+          Simpan Perubahan
+        </button>
+      </div>
+    </div>
+
+    <div class="mb-4">
+      <p class="text-gray-600">Template: <span class="font-semibold">{{ template.name }}</span></p>
+      <p class="text-gray-600">Deskripsi: {{ template.description }}</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div class="lg:col-span-1">
+        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4">
+          <h3 class="text-lg font-semibold text-gray-800 mb-2">Variabel</h3>
+          <div class="space-y-2">
+            {% for var in variables %}
+            <div class="bg-white p-2 rounded border border-gray-200 text-sm">
+              <div class="font-medium">{{ var.display_name }}</div>
+              <div class="text-gray-500 text-xs">{{ var.name }} ({{ var.input_type }})</div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-800 mb-2">Tambah Langkah</h3>
+          <div class="space-y-2">
+            <button class="add-step-btn w-full bg-white p-2 rounded border border-gray-200 text-sm hover:bg-gray-100 transition" data-operator="add">
+              <i class="fas fa-plus-circle text-green-500 mr-1"></i> Tambah
+            </button>
+            <button class="add-step-btn w-full bg-white p-2 rounded border border-gray-200 text-sm hover:bg-gray-100 transition" data-operator="subtract">
+              <i class="fas fa-minus-circle text-red-500 mr-1"></i> Kurang
+            </button>
+            <button class="add-step-btn w-full bg-white p-2 rounded border border-gray-200 text-sm hover:bg-gray-100 transition" data-operator="multiply">
+              <i class="fas fa-times text-blue-500 mr-1"></i> Kali
+            </button>
+            <button class="add-step-btn w-full bg-white p-2 rounded border border-gray-200 text-sm hover:bg-gray-100 transition" data-operator="divide">
+              <i class="fas fa-divide text-yellow-500 mr-1"></i> Bagi
+            </button>
+            <button class="add-step-btn w-full bg-white p-2 rounded border border-gray-200 text-sm hover:bg-gray-100 transition" data-operator="percentage">
+              <i class="fas fa-percentage text-purple-500 mr-1"></i> Persentase
+            </button>
+            <button class="add-step-btn w-full bg-white p-2 rounded border border-gray-200 text-sm hover:bg-gray-100 transition" data-operator="if_condition">
+              <i class="fas fa-code-branch text-indigo-500 mr-1"></i> Kondisi If
+            </button>
+            <button class="add-step-btn w-full bg-white p-2 rounded border border-gray-200 text-sm hover:bg-gray-100 transition" data-operator="greater_than">
+              <i class="fas fa-greater-than text-teal-500 mr-1"></i> Lebih Besar Dari
+            </button>
+            <button class="add-step-btn w-full bg-white p-2 rounded border border-gray-200 text-sm hover:bg-gray-100 transition" data-operator="less_than">
+              <i class="fas fa-less-than text-pink-500 mr-1"></i> Lebih Kecil Dari
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-3">
+        <div class="toolbar">
+          <button id="auto-layout" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition text-sm">
+            <i class="fas fa-magic mr-1"></i> Auto Layout
+          </button>
+          <button id="delete-selected" class="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition text-sm">
+            <i class="fas fa-trash-alt mr-1"></i> Hapus Terpilih
+          </button>
+          <button id="clear-all" class="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition text-sm">
+            <i class="fas fa-broom mr-1"></i> Hapus Semua
+          </button>
+        </div>
+
+        <div id="calculation-canvas" class="calculation-canvas"></div>
+
+        <div id="properties-panel" class="properties-panel mt-4 hidden">
+          <h3 class="text-lg font-semibold text-gray-800 mb-2">Properti Langkah</h3>
+          <form id="step-properties-form" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Langkah</label>
+                <input type="text" id="step-name" class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 transition duration-200">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Variabel Hasil</label>
+                <input type="text" id="result-variable" class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 transition duration-200">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Tipe Input 1</label>
+                <select id="input1-type" class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 transition duration-200">
+                  <option value="variable">Variabel</option>
+                  <option value="value">Nilai</option>
+                  <option value="step">Hasil Langkah Sebelumnya</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nilai Input 1</label>
+                <input type="text" id="input1-value" class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 transition duration-200">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Operator</label>
+                <select id="operator" class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 transition duration-200">
+                  {% for key, value in operators.items %}
+                  <option value="{{ key }}">{{ value }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="input2-container">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Tipe Input 2</label>
+                <select id="input2-type" class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 transition duration-200">
+                  <option value="variable">Variabel</option>
+                  <option value="value">Nilai</option>
+                  <option value="step">Hasil Langkah Sebelumnya</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nilai Input 2</label>
+                <input type="text" id="input2-value" class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 transition duration-200">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="condition-container" style="display: none;">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Langkah Jika Benar</label>
+                <input type="text" id="condition-true-step" class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 transition duration-200">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Langkah Jika Salah</label>
+                <input type="text" id="condition-false-step" class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 transition duration-200">
+              </div>
+            </div>
+
+            <div class="flex justify-end">
+              <button type="button" id="update-step" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition duration-200">
+                Perbarui Langkah
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsPlumb/2.15.6/js/jsplumb.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize jsPlumb
+    const jsPlumbInstance = jsPlumb.getInstance({
+      Endpoint: ["Dot", { radius: 4 }],
+      Connector: ["Bezier", { curviness: 50 }],
+      HoverPaintStyle: { stroke: "#8b5cf6", strokeWidth: 2 },
+      ConnectionOverlays: [
+        ["Arrow", { location: 1, width: 10, length: 10, id: "arrow" }]
+      ],
+      Container: "calculation-canvas"
+    });
+
+    // Variables from Django
+    const variables = {{ variables_json|safe }};
+    const initialSteps = {{ steps_json|safe }};
+    
+    // State
+    let steps = [];
+    let selectedStep = null;
+    const canvas = document.getElementById('calculation-canvas');
+    const propertiesPanel = document.getElementById('properties-panel');
+
+    // Load initial steps
+    if (initialSteps && initialSteps.length > 0) {
+      steps = [...initialSteps];
+      renderSteps();
+    }
+
+    // Add step buttons
+    document.querySelectorAll('.add-step-btn').forEach(button => {
+      button.addEventListener('click', function() {
+        const operator = this.getAttribute('data-operator');
+        addStep(operator);
+      });
+    });
+
+    // Add new step
+    function addStep(operator) {
+      const stepId = 'step_' + Date.now();
+      const step = {
+        id: Date.now(),
+        step_id: stepId,
+        name: getOperatorName(operator),
+        operator: operator,
+        input1_type: 'variable',
+        input1_value: '',
+        input2_type: 'value',
+        input2_value: '',
+        result_variable: '',
+        order: steps.length,
+        condition_true_step: '',
+        condition_false_step: '',
+        position: {
+          left: 50 + Math.random() * 300,
+          top: 50 + Math.random() * 300
+        }
+      };
+      
+      steps.push(step);
+      renderStep(step);
+      selectStep(step.id);
+    }
+
+    // Render all steps
+    function renderSteps() {
+      jsPlumbInstance.reset();
+      canvas.innerHTML = '';
+      
+      steps.forEach(step => {
+        renderStep(step);
+      });
+      
+      // Create connections after all steps are rendered
+      setTimeout(() => {
+        createConnections();
+      }, 100);
+    }
+
+    // Render a single step
+    function renderStep(step) {
+      const stepNode = document.createElement('div');
+      stepNode.id = 'step-' + step.id;
+      stepNode.className = 'step-node';
+      stepNode.dataset.id = step.id;
+      stepNode.dataset.stepId = step.step_id;
+      
+      // Set position if available
+      if (step.position) {
+        stepNode.style.left = step.position.left + 'px';
+        stepNode.style.top = step.position.top + 'px';
+      } else {
+        // Default position
+        stepNode.style.left = (50 + Math.random() * 300) + 'px';
+        stepNode.style.top = (50 + Math.random() * 300) + 'px';
+      }
+      
+      // Create step content
+      stepNode.innerHTML = `
+        <div class="header">
+          <div class="title">${step.name}</div>
+          <div class="handle">
+            <i class="fas fa-grip-horizontal text-gray-400"></i>
+          </div>
+        </div>
+        <div class="content">
+          <div>Operator: ${getOperatorName(step.operator)}</div>
+          <div>Input 1: ${step.input1_type} (${step.input1_value || 'tidak diatur'})</div>
+          ${step.operator !== 'if_condition' ? `<div>Input 2: ${step.input2_type} (${step.input2_value || 'tidak diatur'})</div>` : ''}
+          <div>Hasil: ${step.result_variable || 'tidak diatur'}</div>
+        </div>
+        <div class="input-endpoint"></div>
+        <div class="output-endpoint"></div>
+        ${step.operator === 'if_condition' ? `
+          <div class="true-endpoint"></div>
+          <div class="false-endpoint"></div>
+        ` : ''}
+      `;
+      
+      canvas.appendChild(stepNode);
+      
+      // Make step draggable
+      jsPlumbInstance.draggable(stepNode, {
+        grid: [10, 10],
+        stop: function(event) {
+          // Update position in steps array
+          const stepId = parseInt(event.el.dataset.id);
+          const stepIndex = steps.findIndex(s => s.id === stepId);
+          if (stepIndex !== -1) {
+            steps[stepIndex].position = {
+              left: parseInt(event.el.style.left),
+              top: parseInt(event.el.style.top)
+            };
+          }
+        }
+      });
+      
+      // Add endpoints
+      jsPlumbInstance.addEndpoint(stepNode.querySelector('.input-endpoint'), {
+        isTarget: true,
+        anchor: "Top",
+        maxConnections: -1
+      });
+      
+      jsPlumbInstance.addEndpoint(stepNode.querySelector('.output-endpoint'), {
+        isSource: true,
+        anchor: "Bottom",
+        maxConnections: -1
+      });
+      
+      // Add conditional endpoints if needed
+      if (step.operator === 'if_condition') {
+        jsPlumbInstance.addEndpoint(stepNode.querySelector('.true-endpoint'), {
+          isSource: true,
+          anchor: "Right",
+          maxConnections: 1,
+          connectorStyle: { stroke: "#10b981", strokeWidth: 2 }
+        });
+        
+        jsPlumbInstance.addEndpoint(stepNode.querySelector('.false-endpoint'), {
+          isSource: true,
+          anchor: "Left",
+          maxConnections: 1,
+          connectorStyle: { stroke: "#ef4444", strokeWidth: 2 }
+        });
+      }
+      
+      // Add click event
+      stepNode.addEventListener('click', function() {
+        selectStep(parseInt(this.dataset.id));
+      });
+    }
+
+    // Create connections between steps
+    function createConnections() {
+      steps.forEach(step => {
+        // Regular flow connections
+        if (step.order < steps.length - 1) {
+          const nextStep = steps.find(s => s.order === step.order + 1);
+          if (nextStep) {
+            jsPlumbInstance.connect({
+              source: document.querySelector(`#step-${step.id} .output-endpoint`),
+              target: document.querySelector(`#step-${nextStep.id} .input-endpoint`),
+              connector: ["Bezier", { curviness: 50 }],
+              paintStyle: { stroke: "#8b5cf6", strokeWidth: 2 }
+            });
+          }
+        }
+        
+        // Conditional connections
+        if (step.operator === 'if_condition') {
+          if (step.condition_true_step) {
+            const trueStep = steps.find(s => s.step_id === step.condition_true_step);
+            if (trueStep) {
+              jsPlumbInstance.connect({
+                source: document.querySelector(`#step-${step.id} .true-endpoint`),
+                target: document.querySelector(`#step-${trueStep.id} .input-endpoint`),
+                connector: ["Bezier", { curviness: 50 }],
+                paintStyle: { stroke: "#10b981", strokeWidth: 2 }
+              });
+            }
+          }
+          
+          if (step.condition_false_step) {
+            const falseStep = steps.find(s => s.step_id === step.condition_false_step);
+            if (falseStep) {
+              jsPlumbInstance.connect({
+                source: document.querySelector(`#step-${step.id} .false-endpoint`),
+                target: document.querySelector(`#step-${falseStep.id} .input-endpoint`),
+                connector: ["Bezier", { curviness: 50 }],
+                paintStyle: { stroke: "#ef4444", strokeWidth: 2 }
+              });
+            }
+          }
+        }
+      });
+    }
+
+    // Select a step
+    function selectStep(stepId) {
+      // Clear previous selection
+      document.querySelectorAll('.step-node').forEach(node => {
+        node.classList.remove('selected');
+      });
+      
+      // Find the step
+      const step = steps.find(s => s.id === stepId);
+      if (!step) return;
+      
+      // Highlight the selected step
+      const stepNode = document.getElementById('step-' + stepId);
+      if (stepNode) {
+        stepNode.classList.add('selected');
+      }
+      
+      // Show properties panel
+      propertiesPanel.classList.remove('hidden');
+      
+      // Fill form with step data
+      document.getElementById('step-name').value = step.name;
+      document.getElementById('result-variable').value = step.result_variable;
+      document.getElementById('input1-type').value = step.input1_type;
+      document.getElementById('input1-value').value = step.input1_value;
+      document.getElementById('operator').value = step.operator;
+      document.getElementById('input2-type').value = step.input2_type || 'value';
+      document.getElementById('input2-value').value = step.input2_value || '';
+      
+      // Show/hide input2 based on operator
+      const input2Container = document.getElementById('input2-container');
+      const conditionContainer = document.getElementById('condition-container');
+      
+      if (step.operator === 'if_condition') {
+        input2Container.style.display = 'none';
+        conditionContainer.style.display = 'grid';
+        document.getElementById('condition-true-step').value = step.condition_true_step || '';
+        document.getElementById('condition-false-step').value = step.condition_false_step || '';
+      } else {
+        input2Container.style.display = 'grid';
+        conditionContainer.style.display = 'none';
+      }
+      
+      // Store selected step
+      selectedStep = step;
+    }
+
+    // Update step properties
+    document.getElementById('update-step').addEventListener('click', function() {
+      if (!selectedStep) return;
+      
+      const stepIndex = steps.findIndex(s => s.id === selectedStep.id);
+      if (stepIndex === -1) return;
+      
+      // Update step data
+      steps[stepIndex].name = document.getElementById('step-name').value;
+      steps[stepIndex].result_variable = document.getElementById('result-variable').value;
+      steps[stepIndex].input1_type = document.getElementById('input1-type').value;
+      steps[stepIndex].input1_value = document.getElementById('input1-value').value;
+      
+      const newOperator = document.getElementById('operator').value;
+      const operatorChanged = steps[stepIndex].operator !== newOperator;
+      steps[stepIndex].operator = newOperator;
+      
+      if (steps[stepIndex].operator === 'if_condition') {
+        steps[stepIndex].condition_true_step = document.getElementById('condition-true-step').value;
+        steps[stepIndex].condition_false_step = document.getElementById('condition-false-step').value;
+      } else {
+        steps[stepIndex].input2_type = document.getElementById('input2-type').value;
+        steps[stepIndex].input2_value = document.getElementById('input2-value').value;
+      }
+      
+      // If operator changed, we need to re-render everything
+      if (operatorChanged) {
+        renderSteps();
+      } else {
+        // Just update the node content
+        const stepNode = document.getElementById('step-' + selectedStep.id);
+        if (stepNode) {
+          const contentDiv = stepNode.querySelector('.content');
+          contentDiv.innerHTML = `
+            <div>Operator: ${getOperatorName(steps[stepIndex].operator)}</div>
+            <div>Input 1: ${steps[stepIndex].input1_type} (${steps[stepIndex].input1_value || 'tidak diatur'})</div>
+            ${steps[stepIndex].operator !== 'if_condition' ? `<div>Input 2: ${steps[stepIndex].input2_type} (${steps[stepIndex].input2_value || 'tidak diatur'})</div>` : ''}
+            <div>Hasil: ${steps[stepIndex].result_variable || 'tidak diatur'}</div>
+          `;
+          stepNode.querySelector('.title').textContent = steps[stepIndex].name;
+        }
+      }
+    });
+
+    // Delete selected step
+    document.getElementById('delete-selected').addEventListener('click', function() {
+      if (!selectedStep) return;
+      
+      const stepIndex = steps.findIndex(s => s.id === selectedStep.id);
+      if (stepIndex === -1) return;
+      
+      // Remove step
+      steps.splice(stepIndex, 1);
+      
+      // Re-render
+      renderSteps();
+      
+      // Hide properties panel
+      propertiesPanel.classList.add('hidden');
+      selectedStep = null;
+    });
+
+    // Clear all steps
+    document.getElementById('clear-all').addEventListener('click', function() {
+      if (confirm('Apakah Anda yakin ingin menghapus semua langkah?')) {
+        steps = [];
+        renderSteps();
+        propertiesPanel.classList.add('hidden');
+        selectedStep = null;
+      }
+    });
+
+    // Auto layout
+    document.getElementById('auto-layout').addEventListener('click', function() {
+      autoLayout();
+    });
+
+    // Auto layout function
+    function autoLayout() {
+      const levelMap = {};
+      const processed = new Set();
+      
+      // Find root nodes (no incoming connections)
+      const rootNodes = steps.filter(step => {
+        return !steps.some(s => {
+          if (s.operator === 'if_condition') {
+            return s.condition_true_step === step.step_id || s.condition_false_step === step.step_id;
+          }
+          return false;
+        });
+      });
+      
+      // Assign levels
+      function assignLevels(node, level) {
+        if (processed.has(node.id)) return;
+        processed.add(node.id);
+        
+        if (!levelMap[level]) levelMap[level] = [];
+        levelMap[level].push(node);
+        
+        // Find children
+        if (node.operator === 'if_condition') {
+          const trueStep = steps.find(s => s.step_id === node.condition_true_step);
+          if (trueStep) assignLevels(trueStep, level + 1);
+          
+          const falseStep = steps.find(s => s.step_id === node.condition_false_step);
+          if (falseStep) assignLevels(falseStep, level + 1);
+        }
+      }
+      
+      // Start with root nodes
+      rootNodes.forEach(node => assignLevels(node, 0));
+      
+      // Position nodes based on levels
+      const levelHeight = 150;
+      const nodeWidth = 220;
+      const nodeSpacing = 30;
+      
+      Object.keys(levelMap).forEach(level => {
+        const nodesInLevel = levelMap[level];
+        const levelWidth = nodesInLevel.length * nodeWidth + (nodesInLevel.length - 1) * nodeSpacing;
+        const startX = (canvas.clientWidth - levelWidth) / 2;
+        
+        nodesInLevel.forEach((node, index) => {
+          const nodeIndex = steps.findIndex(s => s.id === node.id);
+          if (nodeIndex !== -1) {
+            steps[nodeIndex].position = {
+              left: startX + index * (nodeWidth + nodeSpacing),
+              top: level * levelHeight + 50
+            };
+          }
+        });
+      });
+      
+      // Re-render
+      renderSteps();
+    }
+
+    // Save button
+    document.getElementById('save-button').addEventListener('click', function() {
+      saveSteps();
+    });
+
+    // Save steps to server
+    function saveSteps() {
+      // Prepare data for saving
+      const stepsData = steps.map(step => ({
+        step_id: step.step_id,
+        name: step.name,
+        operator: step.operator,
+        input1_type: step.input1_type,
+        input1_value: step.input1_value,
+        input2_type: step.input2_type,
+        input2_value: step.input2_value,
+        result_variable: step.result_variable,
+        condition_true_step: step.condition_true_step,
+        condition_false_step: step.condition_false_step
+      }));
+      
+      // Send to server
+      fetch('{% url "penggajiV2:save_calculation_steps" template.id %}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify(stepsData)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          alert('Langkah perhitungan berhasil disimpan');
+        } else {
+          alert('Error: ' + data.message);
+        }
+      })
+      .catch(error => {
+        alert('Error: ' + error);
+      });
+    }
+
+    // Helper function to get operator name
+    function getOperatorName(operator) {
+      const operatorMap = {
+        'add': 'Tambah',
+        'subtract': 'Kurang',
+        'multiply': 'Kali',
+        'divide': 'Bagi',
+        'percentage': 'Persentase',
+        'if_condition': 'Kondisi If',
+        'greater_than': 'Lebih Besar Dari',
+        'less_than': 'Lebih Kecil Dari',
+        'equal': 'Sama Dengan',
+        'not_equal': 'Tidak Sama Dengan'
+      };
+      return operatorMap[operator] || operator;
+    }
+
+    // Operator change event
+    document.getElementById('operator').addEventListener('change', function() {
+      const operator = this.value;
+      const input2Container = document.getElementById('input2-container');
+      const conditionContainer = document.getElementById('condition-container');
+      
+      if (operator === 'if_condition') {
+        input2Container.style.display = 'none';
+        conditionContainer.style.display = 'grid';
+      } else {
+        input2Container.style.display = 'grid';
+        conditionContainer.style.display = 'none';
+      }
+    });
+  });
+</script>
+{% endblock %}

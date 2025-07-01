@@ -51,6 +51,38 @@
                             </li>
                         </ul>
                     </li>
+                    <!-- Tambahkan menu PenggajiV2 di sini -->
+                    <li class="relative">
+                        <input type="checkbox" class="absolute opacity-0 inset-0 w-full h-12 cursor-pointer peer">
+                        <button class="flex items-center w-full px-6 py-3 text-sm text-pink-300 hover:bg-pink-800 hover:text-white transition-colors duration-200">
+                            <i class="fas fa-calculator w-5 h-5"></i>
+                            <span class="ml-3">Penggaji V2</span>
+                            <i class="fas fa-chevron-down ml-auto transition-transform duration-200 peer-checked:rotate-180"></i>
+                        </button>
+                        <ul class="hidden peer-checked:block bg-pink-950 rounded-sm">
+                            <li>
+                                <a href="{% url 'penggajiV2:template_list' %}" 
+                                   class="flex items-center px-8 py-2 text-sm {% if request.resolver_match.url_name == 'template_list' %}bg-pink-800 text-white{% else %}text-pink-300 hover:bg-pink-800 hover:text-white{% endif %} transition-colors duration-200">
+                                    <i class="fas fa-file-alt w-5 h-5"></i>
+                                    <span class="ml-3">Template Perhitungan</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'penggajiV2:assignment_list' %}" 
+                                   class="flex items-center px-8 py-2 text-sm {% if request.resolver_match.url_name == 'assignment_list' %}bg-pink-800 text-white{% else %}text-pink-300 hover:bg-pink-800 hover:text-white{% endif %} transition-colors duration-200">
+                                    <i class="fas fa-tasks w-5 h-5"></i>
+                                    <span class="ml-3">Penugasan Template</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'penggajiV2:calculation_history' %}" 
+                                   class="flex items-center px-8 py-2 text-sm {% if request.resolver_match.url_name == 'calculation_history' %}bg-pink-800 text-white{% else %}text-pink-300 hover:bg-pink-800 hover:text-white{% endif %} transition-colors duration-200">
+                                    <i class="fas fa-history w-5 h-5"></i>
+                                    <span class="ml-3">Riwayat Perhitungan</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                     <li>
                         <a href="{% url 'pengelolaKaryawan_read' %}" 
                            class="flex items-center px-6 py-3 text-sm {% if request.resolver_match.url_name == 'pengelolaKaryawan_read' %}bg-pink-800 text-white{% else %}text-pink-300 hover:bg-pink-800 hover:text-white{% endif %} transition-colors duration-200">

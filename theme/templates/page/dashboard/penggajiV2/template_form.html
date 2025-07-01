@@ -1,0 +1,66 @@
+{% extends 'layout/dashboard/base.html' %}
+{% block title %}SI-Penggaji - {% if template %}Edit{% else %}Tambah{% endif %} Template Perhitungan{% endblock %}
+{% block content %}
+<div class="container mx-auto px-6 py-8">
+  <div class="bg-white rounded-xl shadow-md p-6">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">{% if template %}Edit{% else %}Tambah{% endif %} Template Perhitungan</h2>
+
+    <form method="POST" class="space-y-6" novalidate autocomplete="off">
+      {% csrf_token %}
+
+      <div class="grid grid-cols-1 gap-6">
+        <div class="form-group">
+          <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+            Nama Template <span class="text-red-500">*</span>
+          </label>
+          <input type="text" 
+                 id="name" 
+                 name="name" 
+                 value="{{ template.name }}" 
+                 required 
+                 aria-required="true"
+                 class="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-pink-500 focus:ring focus:ring-pink-200 transition duration-200"
+                 placeholder="Masukkan nama template">
+        </div>
+
+        <div class="form-group">
+          <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+            Deskripsi
+          </label>
+          <textarea id="description" 
+                    name="description" 
+                    rows="4"
+                    class="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-pink-500 focus:ring focus:ring-pink-200 transition duration-200"
+                    placeholder="Masukkan deskripsi template">{{ template.description }}</textarea>
+        </div>
+
+        {% if template %}
+        <div class="form-group">
+          <div class="flex items-center">
+            <input type="checkbox" 
+                   id="is_active" 
+                   name="is_active" 
+                   {% if template.is_active %}checked{% endif %}
+                   class="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded">
+            <label for="is_active" class="ml-2 block text-sm text-gray-700">
+              Template Aktif
+            </label>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="flex justify-end space-x-4">
+        <a href="{% url 'penggajiV2:template_list' %}" 
+           class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500">
+          Batal
+        </a>
+        <button type="submit" 
+                class="px-4 py-2 bg-pink-500 text-white rounded hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-500">
+          Simpan
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,145 @@
+{% extends 'layout/dashboard/base.html' %}
+{% block title %}SI-Penggaji - {% if variable %}Edit{% else %}Tambah{% endif %} Variabel Perhitungan{% endblock %}
+{% block content %}
+<div class="container mx-auto px-6 py-8">
+  <div class="bg-white rounded-xl shadow-md p-6">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">{% if variable %}Edit{% else %}Tambah{% endif %} Variabel Perhitungan</h2>
+
+    <form method="POST" class="space-y-6" novalidate autocomplete="off">
+      {% csrf_token %}
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="form-group">
+          <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+            Nama Variabel <span class="text-red-500">*</span>
+            <span class="text-xs text-gray-500">(tanpa spasi, hanya huruf dan angka)</span>
+          </label>
+          <input type="text" 
+                 id="name" 
+                 name="name" 
+                 value="{{ variable.name }}" 
+                 required 
+                 aria-required="true"
+                 class="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-pink-500 focus:ring focus:ring-pink-200 transition duration-200"
+                 placeholder="contoh: gaji_pokok">
+        </div>
+
+        <div class="form-group">
+          <label for="display_name" class="block text-sm font-medium text-gray-700 mb-2">
+            Label Tampilan <span class="text-red-500">*</span>
+          </label>
+          <input type="text" 
+                 id="display_name" 
+                 name="display_name" 
+                 value="{{ variable.display_name }}" 
+                 required 
+                 aria-required="true"
+                 class="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-pink-500 focus:ring focus:ring-pink-200 transition duration-200"
+                 placeholder="contoh: Gaji Pokok">
+        </div>
+
+        <div class="form-group">
+          <label for="input_type" class="block text-sm font-medium text-gray-700 mb-2">
+            Tipe Input <span class="text-red-500">*</span>
+          </label>
+          <select id="input_type" 
+                  name="input_type" 
+                  required 
+                  aria-required="true"
+                  class="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-pink-500 focus:ring focus:ring-pink-200 transition duration-200"
+                  onchange="toggleOptionsField()">
+            <option value="" disabled {% if not variable %}selected{% endif %}>Pilih Tipe Input</option>
+            {% for value, label in input_types.items %}
+              <option value="{{ value }}" {% if variable.input_type == value %}selected{% endif %}>
+                {{ label }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="order" class="block text-sm font-medium text-gray-700 mb-2">
+            Urutan Tampilan
+          </label>
+          <input type="number" 
+                 id="order" 
+                 name="order" 
+                 value="{{ variable.order|default:0 }}" 
+                 min="0"
+                 class="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-pink-500 focus:ring focus:ring-pink-200 transition duration-200"
+                 placeholder="0">
+        </div>
+
+        <div class="form-group">
+          <label for="default_value" class="block text-sm font-medium text-gray-700 mb-2">
+            Nilai Default
+          </label>
+          <input type="text" 
+                 id="default_value" 
+                 name="default_value" 
+                 value="{{ variable.default_value }}" 
+                 class="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-pink-500 focus:ring focus:ring-pink-200 transition duration-200"
+                 placeholder="Nilai default jika ada">
+        </div>
+
+        <div class="form-group">
+          <div class="flex items-center h-full pt-8">
+            <input type="checkbox" 
+                   id="is_required" 
+                   name="is_required" 
+                   {% if variable.is_required %}checked{% endif %}
+                   class="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded">
+            <label for="is_required" class="ml-2 block text-sm text-gray-700">
+              Wajib Diisi
+            </label>
+          </div>
+        </div>
+
+        <div id="options_container" class="form-group md:col-span-2 {% if not variable or variable.input_type != 'select' %}hidden{% endif %}">
+          <label for="options" class="block text-sm font-medium text-gray-700 mb-2">
+            Opsi Pilihan <span class="text-red-500">*</span>
+            <span class="text-xs text-gray-500">(format JSON: [{"value": "1", "label": "Opsi 1"}])</span>
+          </label>
+          <textarea id="options" 
+                    name="options" 
+                    rows="4"
+                    class="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-pink-500 focus:ring focus:ring-pink-200 transition duration-200 font-mono text-sm"
+                    placeholder='[
+  {"value": "1", "label": "Opsi 1"},
+  {"value": "2", "label": "Opsi 2"}
+]'>{{ variable.options }}</textarea>
+        </div>
+      </div>
+
+      <div class="flex justify-end space-x-4 mt-8">
+        <a href="{% url 'penggajiV2:template_detail' template_id=template.id %}" 
+           class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500">
+          Batal
+        </a>
+        <button type="submit" 
+                class="px-4 py-2 bg-pink-500 text-white rounded hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-500">
+          Simpan
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function toggleOptionsField() {
+    const inputType = document.getElementById('input_type').value;
+    const optionsContainer = document.getElementById('options_container');
+    
+    if (inputType === 'select') {
+      optionsContainer.classList.remove('hidden');
+    } else {
+      optionsContainer.classList.add('hidden');
+    }
+  }
+  
+  // Initialize on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    toggleOptionsField();
+  });
+</script>
+{% endblock %}

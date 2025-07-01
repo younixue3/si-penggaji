@@ -1,0 +1,130 @@
+{% extends 'layout/dashboard/base.html' %}
+
+{% block title %}SI-Penggaji - Form Perhitungan Gaji{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-6 py-8">
+  <div class="bg-white rounded-xl shadow-md p-6">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">Form Perhitungan Gaji</h2>
+    <p class="text-gray-600 mb-6">Template: <span class="font-semibold">{{ template.name }}</span> | Pengguna: <span class="font-semibold">{{ assignment.user.username }}</span></p>
+
+    <form method="POST" class="space-y-6" novalidate autocomplete="off">
+      {% csrf_token %}
+
+      <div class="grid grid-cols-1 gap-6">
+        <div class="form-group">
+          <label for="calculation_date" class="block text-sm font-medium text-gray-700 mb-2">
+            Tanggal Perhitungan <span class="text-red-500">*</span>
+          </label>
+          <input type="date" 
+                 id="calculation_date" 
+                 name="calculation_date" 
+                 required
+                 aria-required="true"
+                 value="{{ calculation_date|default:'' }}"
+                 class="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 transition duration-200">
+        </div>
+      </div>
+
+      <div class="border-t border-gray-200 pt-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Variabel Input</h3>
+        
+        {% for var in variables %}
+        <div class="form-group mb-4">
+          <label for="var_{{ var.name }}" class="block text-sm font-medium text-gray-700 mb-2">
+            {{ var.display_name }} {% if var.is_required %}<span class="text-red-500">*</span>{% endif %}
+          </label>
+          
+          {% if var.input_type == 'number' %}
+          <input type="number" 
+                 id="var_{{ var.name }}" 
+                 name="var_{{ var.name }}" 
+                 {% if var.is_required %}required aria-required="true"{% endif %}
+                 value="{{ var.default_value|default:'' }}"
+                 step="0.01"
+                 class="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 transition duration-200">
+          
+          {% elif var.input_type == 'text' %}
+          <input type="text" 
+                 id="var_{{ var.name }}" 
+                 name="var_{{ var.name }}" 
+                 {% if var.is_required %}required aria-required="true"{% endif %}
+                 value="{{ var.default_value|default:'' }}"
+                 class="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 transition duration-200">
+          
+          {% elif var.input_type == 'date' %}
+          <input type="date" 
+                 id="var_{{ var.name }}" 
+                 name="var_{{ var.name }}" 
+                 {% if var.is_required %}required aria-required="true"{% endif %}
+                 value="{{ var.default_value|default:'' }}"
+                 class="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 transition duration-200">
+          
+          {% elif var.input_type == 'time' %}
+          <input type="time" 
+                 id="var_{{ var.name }}" 
+                 name="var_{{ var.name }}" 
+                 {% if var.is_required %}required aria-required="true"{% endif %}
+                 value="{{ var.default_value|default:'' }}"
+                 class="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 transition duration-200">
+          
+          {% elif var.input_type == 'boolean' %}
+          <div class="flex items-center">
+            <input type="checkbox" 
+                   id="var_{{ var.name }}" 
+                   name="var_{{ var.name }}" 
+                   value="true"
+                   {% if var.default_value == 'true' %}checked{% endif %}
+                   class="h-5 w-5 text-purple-600 focus:ring-purple-500 border-gray-300 rounded">
+            <label for="var_{{ var.name }}" class="ml-2 block text-sm text-gray-700">Ya</label>
+          </div>
+          
+          {% elif var.input_type == 'select' %}
+          <select id="var_{{ var.name }}" 
+                  name="var_{{ var.name }}" 
+                  {% if var.is_required %}required aria-required="true"{% endif %}
+                  class="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:border-purple-500 focus:ring focus:ring-purple-200 transition duration-200">
+            <option value="" disabled selected>Pilih Opsi</option>
+            {% if var.options %}
+              {% with options=var.options|safe %}
+                {% for option in options %}
+                  <option value="{{ option.value }}" {% if var.default_value == option.value %}selected{% endif %}>
+                    {{ option.label }}
+                  </option>
+                {% endfor %}
+              {% endwith %}
+            {% endif %}
+          </select>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="flex justify-end space-x-4">
+        <a href="{% url 'penggajiV2:assignment_list' %}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition duration-200">
+          Batal
+        </a>
+        <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition duration-200">
+          Hitung Gaji
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Set default date to today if not already set
+    const dateInput = document.getElementById('calculation_date');
+    if (!dateInput.value) {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      dateInput.value = `${year}-${month}-${day}`;
+    }
+  });
+</script>
+{% endblock %}

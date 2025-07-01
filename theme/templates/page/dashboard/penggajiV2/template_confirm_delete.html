@@ -1,0 +1,43 @@
+{% extends 'layout/dashboard/base.html' %}
+{% block title %}SI-Penggaji - Hapus Template Perhitungan{% endblock %}
+{% block content %}
+<div class="container mx-auto px-6 py-8">
+  <div class="bg-white rounded-xl shadow-md p-6 max-w-lg mx-auto">
+    <div class="text-center mb-6">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 text-red-500 mb-4">
+        <i class="fas fa-exclamation-triangle text-2xl"></i>
+      </div>
+      <h2 class="text-2xl font-bold text-gray-800">Konfirmasi Hapus</h2>
+    </div>
+
+    <p class="text-gray-600 text-center mb-6">
+      Apakah Anda yakin ingin menghapus template perhitungan <strong>{{ template.name }}</strong>?
+    </p>
+    
+    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <i class="fas fa-exclamation-circle text-yellow-400"></i>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm text-yellow-700">
+            Perhatian! Menghapus template ini akan menghapus semua variabel, langkah perhitungan, dan penugasan yang terkait. Tindakan ini tidak dapat dibatalkan.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <form method="POST" class="flex justify-center space-x-4">
+      {% csrf_token %}
+      <a href="{% url 'penggajiV2:template_list' %}" 
+         class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500">
+        Batal
+      </a>
+      <button type="submit" 
+              class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500">
+        Hapus
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}
