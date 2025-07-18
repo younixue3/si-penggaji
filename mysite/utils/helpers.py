@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import redirect
 from django.contrib import messages
 from functools import wraps
+from django.db.models import QuerySet
 
 def dd(*args):
     html = """
@@ -32,7 +33,64 @@ def dd(*args):
 
     def format_value(value, depth=0):
         indent = "  " * depth
-        if isinstance(value, (dict, list)):
+        if isinstance(value, QuerySet):
+            if value.count() == 1:
+                obj = value.first()
+                fields = [f.name for f in obj._meta.get_fields()]
+                
+                result = f'<div class="group rounded p-1">'
+                result += f'<div class="cursor-pointer select-none flex items-center" onclick="toggleCollapse(this)">'
+                result += f'<span class="arrow inline-block mr-1">▼</span>'
+                result += f'<span class="italic text-purple-500">{obj._meta.object_name}</span>'
+                result += '</div>'
+                result += f'<div class="ml-6 space-y-1">'
+                
+                # Show all fields and their values
+                for field in fields:
+                    try:
+                        field_value = getattr(obj, field)
+                        result += f'<div>{indent}<span class="text-green-500">{field}</span>: {format_value(field_value, depth + 1)}</div>'
+                    except:
+                        result += f'<div>{indent}<span class="text-green-500">{field}</span>: <span class="text-gray-600">unavailable</span></div>'
+                
+                result += '</div></div>'
+                return result
+            else:
+                # Original QuerySet handling for multiple items
+                model = value.model
+                fields = [f.name for f in model._meta.get_fields()]
+                
+                result = f'<div class="group rounded p-1">'
+                result += f'<div class="cursor-pointer select-none flex items-center" onclick="toggleCollapse(this)">'
+                result += f'<span class="arrow inline-block mr-1">▼</span>'
+                result += f'<span class="italic text-purple-500">QuerySet</span> '
+                result += f'<span class="text-gray-600">({value.count()} items)</span>'
+                result += '</div>'
+                result += f'<div class="ml-6 space-y-1">'
+                
+                # Show available fields
+                result += '<div class="text-blue-400 mb-2">Fields: ' + ', '.join(fields) + '</div>'
+                
+                # Show each object in queryset
+                for obj in value:
+                    result += f'<div class="group rounded p-1">'
+                    result += f'<div class="cursor-pointer select-none flex items-center" onclick="toggleCollapse(this)">'
+                    result += f'<span class="arrow inline-block mr-1">▼</span>'
+                    result += f'<span class="italic text-purple-500">{obj._meta.object_name}</span>'
+                    result += '</div>'
+                    result += f'<div class="ml-6 space-y-1">'
+                    for field in fields:
+                        try:
+                            field_value = getattr(obj, field)
+                            result += f'<div>{indent}<span class="text-green-500">{field}</span>: {format_value(field_value, depth + 1)}</div>'
+                        except:
+                            result += f'<div>{indent}<span class="text-green-500">{field}</span>: <span class="text-gray-600">unavailable</span></div>'
+                    result += '</div></div>'
+                
+                result += '</div></div>'
+                return result
+            
+        elif isinstance(value, (dict, list)):
             is_dict = isinstance(value, dict)
             items = value.items() if is_dict else enumerate(value)
             type_name = "dict" if is_dict else "list"
@@ -51,6 +109,30 @@ def dd(*args):
                 result += f'<div>{indent}{key}{format_value(v, depth + 1)}</div>'
             
             result += '</div></div>'
+            return result
+        elif hasattr(value, '__str__') and str(value).startswith('<') and str(value).endswith('>'):
+            model_str = str(value)
+            model_name = model_str[1:model_str.find(':')]
+            model_desc = model_str[model_str.find(':')+2:-1]
+            
+            result = f'<div class="group rounded p-1">'
+            result += f'<div class="cursor-pointer select-none flex items-center" onclick="toggleCollapse(this)">'
+            result += f'<span class="arrow inline-block mr-1">▼</span>'
+            result += f'<span class="italic text-purple-500">{model_name}</span>: '
+            result += f'<span class="text-yellow-400">{escape(model_desc)}</span>'
+            result += '</div>'
+            
+            if hasattr(value, '_meta'):
+                result += f'<div class="ml-6 space-y-1">'
+                for field in value._meta.get_fields():
+                    try:
+                        field_value = getattr(value, field.name)
+                        result += f'<div>{indent}<span class="text-green-500">{field.name}</span>: {format_value(field_value, depth + 1)}</div>'
+                    except:
+                        result += f'<div>{indent}<span class="text-green-500">{field.name}</span>: <span class="text-gray-600">unavailable</span></div>'
+                result += '</div>'
+            
+            result += '</div>'
             return result
         elif isinstance(value, str):
             return f'<span class="text-yellow-400">{escape(repr(value))}</span>'
