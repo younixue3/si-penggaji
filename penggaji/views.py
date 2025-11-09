@@ -251,6 +251,15 @@ def izin_update(request, pk, slip_gaji_id, penggajian_id):
             if status_off:
                 izin.status_off = status_off
 
+            elif time_out:
+                izin.time_out = datetime.strptime(time_out, '%H:%M').time()
+
+            elif time_in:
+                izin.time_in = datetime.strptime(time_in, '%H:%M').time()
+
+            elif time_work:
+                izin.time_work = datetime.strptime(time_work, '%H:%M').time()
+
             else:
                 if not all([date, time_out, time_in, time_work]):
                     messages.error(request, "All fields are required")
