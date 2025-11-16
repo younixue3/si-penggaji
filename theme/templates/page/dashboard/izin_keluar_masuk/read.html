@@ -57,13 +57,7 @@
           {% for izin in izin_list %}
           <tr class="transition duration-150 ease-in-out {% if izin.status_off %}bg-red-700 text-white{% elif izin.upah_harian > 0 and not izin.status_off %}bg-green-200 text-gray-900{% else %}hover:bg-pink-50 text-gray-900{% endif %}">
             <td class="p-4 text-sm">{{ forloop.counter }}</td>
-            <td class="p-4 text-sm form_dbl_click_disable" data-inline-edit id="form-date-{{ izin.id }}">
-              <form action="{% url 'izin_update' pk=izin.id penggajian_id=penggajian_id slip_gaji_id=slip_gaji.id %}" method="POST" class="inline">
-                {% csrf_token %}
-                <input type="date" name="date" value="{{ izin.date|date:'Y-m-d' }}" class="border rounded px-2 py-1 text-sm bg-transparent" disabled>
-                <button type="submit" class="hidden">Simpan</button>
-              </form>
-            </td>
+            <td class="p-4 text-sm">{{ izin.date|date:'d/m/Y' }}</td>
             <td class="p-4 text-sm form_dbl_click_disable" data-inline-edit id="form-time-out-{{ izin.id }}">
               <form action="{% url 'izin_update' pk=izin.id penggajian_id=penggajian_id slip_gaji_id=slip_gaji.id %}" method="POST" class="inline">
                 {% csrf_token %}
