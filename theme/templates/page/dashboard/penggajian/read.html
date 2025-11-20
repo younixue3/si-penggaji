@@ -28,6 +28,7 @@
           <tr>
             <th class="p-4 text-left font-medium text-gray-600">No</th>
             <th class="p-4 text-left font-medium text-gray-600">Bulan</th>
+            <th class="p-4 text-left font-medium text-gray-600">Deskripsi</th>
             <th class="p-4 text-left font-medium text-gray-600">Jumlah Hari</th>
             <th class="p-4 text-left font-medium text-gray-600">Status</th>
             <th class="p-4 text-left font-medium text-gray-600">Aksi</th>
@@ -39,6 +40,7 @@
           <tr class="border-b hover:bg-pink-50">
             <td class="p-4">{{ forloop.counter }}</td>
             <td class="p-4 first-letter:uppercase">{{ penggajian.month }}</td>
+            <td class="p-4">{{ penggajian.description }}</td>
             <td class="p-4">{{ penggajian.days_in_month }} hari</td>
             <td class="p-4">
               <div class="relative inline-block">

@@ -33,6 +33,7 @@ def penggajian_create(request):
             status = request.POST.get('status')
             date_form = request.POST.get('date_from')
             date_to = request.POST.get('date_to')
+            description = request.POST.get('description')
 
             if not all([days_in_month, month, status]):
                 messages.error(request, "All fields are required")
@@ -61,11 +62,16 @@ def penggajian_create(request):
             except Penggajian.DoesNotExist:
                 pass
 
+
+
             # Create new penggajian record
             penggajian = Penggajian.objects.create(
                 days_in_month=int(days_in_month),
                 month=month,
-                status=status
+                status=status,
+                date_from=datetime.strptime(date_form, '%Y-%m-%d').date(),
+                date_to=datetime.strptime(date_to, '%Y-%m-%d').date(),
+                description=description
             )
             
             messages.success(request, 'Penggajian created successfully')
@@ -251,14 +257,14 @@ def izin_update(request, pk, slip_gaji_id, penggajian_id):
             if status_off:
                 izin.status_off = status_off
 
-            elif time_out:
-                izin.time_out = datetime.strptime(time_out, '%H:%M').time()
+            # if time_out:
+            #     izin.time_out = datetime.strptime(time_out, '%H:%M').time()
 
-            elif time_in:
-                izin.time_in = datetime.strptime(time_in, '%H:%M').time()
+            # if time_in:
+            #     izin.time_in = datetime.strptime(time_in, '%H:%M').time()
 
-            elif time_work:
-                izin.time_work = datetime.strptime(time_work, '%H:%M').time()
+            # if time_work:
+            #     izin.time_work = datetime.strptime(time_work, '%H:%M').time()
 
             else:
                 if not all([date, time_out, time_in, time_work]):
@@ -308,6 +314,7 @@ def izin_update(request, pk, slip_gaji_id, penggajian_id):
                 'slip_gaji': slip_gaji
             })
         except Exception as e:
+            print(e)
             messages.error(request, "An error occurred while updating the record")
             return render(request, 'page/dashboard/izin_keluar_masuk/update.html', {
                 'izin': izin,

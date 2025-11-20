@@ -69,6 +69,11 @@ class Penggajian(models.Model):
         auto_now=True,
         help_text="Timestamp when record was last updated"
     )
+    description = models.TextField(
+        null=True, 
+        blank=True,
+        help_text="Optional description for the payroll period"
+    )
 
     class Meta:
         verbose_name = "Penggajian"
@@ -224,6 +229,9 @@ class IzinKeluarMasuk(models.Model):
     nilai_izin = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     time_work = models.TimeField(blank=True, default=time(0, 0))
     upah_harian = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    upah_kotor = models.IntegerField(default=0)
+    potongan_izin = models.IntegerField(default=0)
+    potongan_tkm_tmb = models.IntegerField(default=0)
     potongan = models.BooleanField(default=False)
     status_off = models.BooleanField(default=False)
 
@@ -248,18 +256,25 @@ class IzinKeluarMasuk(models.Model):
             minutes = 0
         
         nilai_izin = self.nilai_izin - 60
+        waktu_kerja = Decimal(str(minutes))
         if nilai_izin > 0:
             minutes -= nilai_izin
-
-        upah_harian = Decimal(str(minutes)) * Decimal(str(upah_per_menit))
-
-        if self.potongan:
-            upah_harian = upah_harian * Decimal('0.95')  # Apply 5% discount
         
+
+        upah_kotor = waktu_kerja * Decimal(str(upah_per_menit))
+
+        potongan_izin = Decimal(str(nilai_izin)) * Decimal(str(upah_per_menit))
+        if self.potongan:
+            self.potongan_tkm_tmb = upah_kotor - (upah_kotor * Decimal('0.95'))
+        
+        upah_harian = upah_kotor - (potongan_izin + self.potongan_tkm_tmb)
+
         if self.status_off:
             upah_harian = 0
 
         self.upah_harian = upah_harian
+        self.upah_kotor = upah_kotor
+        self.potongan_izin = potongan_izin
 
         return self.upah_harian
     

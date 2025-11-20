@@ -29,6 +29,7 @@ def pengelolaKaryawan_create(request):
         is_staff = request.POST.get('is_staff') == 'on'
         is_superuser = request.POST.get('is_superuser') == 'on'
         gaji_pokok = request.POST.get('gaji_pokok', '0')
+        tanggal_bekerja = request.POST.get('tanggal_bekerja', 4)
         
         # Validate password confirmation
         if password != password_confirmation:
