@@ -251,33 +251,35 @@ def izin_update(request, pk, slip_gaji_id, penggajian_id):
             time_out = request.POST.get('time_out')
             time_in = request.POST.get('time_in')
             time_work = request.POST.get('time_work')
+            jam_selesai = request.POST.get('jam_selesai')
             potongan = True if request.POST.get('potongan') == 'on' else False
             status_off = True if request.POST.get('status_off') == 'true' else False
 
             if status_off:
                 izin.status_off = status_off
 
-            # if time_out:
-            #     izin.time_out = datetime.strptime(time_out, '%H:%M').time()
-
-            # if time_in:
-            #     izin.time_in = datetime.strptime(time_in, '%H:%M').time()
-
-            # if time_work:
-            #     izin.time_work = datetime.strptime(time_work, '%H:%M').time()
-
             else:
-                if not all([date, time_out, time_in, time_work]):
+                # Only validate all fields if more than 2 attributes are present
+                if len(request.POST) > 2 and not all([time_out, time_in, time_work, jam_selesai]):
                     messages.error(request, "All fields are required")
                     return render(request, 'page/dashboard/izin_keluar_masuk/update.html', {
                         'izin': izin,
                         'slip_gaji': slip_gaji
                     })
 
+                # # Ensure time fields are not None before parsing
+                # if not all([time_out, time_in, time_work, jam_selesai]):
+                #     messages.error(request, "Time fields cannot be empty")
+                #     return render(request, 'page/dashboard/izin_keluar_masuk/update.html', {
+                #         'izin': izin,
+                #         'slip_gaji': slip_gaji
+                #     })
+
                 try:
                     time_out_obj = datetime.strptime(time_out, '%H:%M')
                     time_in_obj = datetime.strptime(time_in, '%H:%M')
                     time_work_obj = datetime.strptime(time_work, '%H:%M')
+                    jam_selesai_obj = datetime.strptime(jam_selesai, '%H:%M')
                 except ValueError:
                     messages.error(request, "Invalid time format. Please use HH:MM format")
                     return render(request, 'page/dashboard/izin_keluar_masuk/update.html', {
@@ -296,9 +298,10 @@ def izin_update(request, pk, slip_gaji_id, penggajian_id):
                 nilai_izin = time_diff.total_seconds() / 60
 
                 izin.date = date
-                izin.time_out = datetime.strptime(time_out, '%H:%M').time()
-                izin.time_in = datetime.strptime(time_in, '%H:%M').time() 
-                izin.time_work = datetime.strptime(time_work, '%H:%M').time()
+                izin.time_out = time_out_obj.time()
+                izin.time_in = time_in_obj.time()
+                izin.jam_selesai = jam_selesai_obj.time()
+                izin.time_work = time_work_obj.time()
                 izin.nilai_izin = nilai_izin
                 izin.potongan = potongan
 

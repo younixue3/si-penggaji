@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from penggaji.models import TableGaji
 from mysite.utils.helpers import dd
+from datetime import datetime
 
 @login_required
 def pengelolaKaryawan_view(request):
@@ -29,6 +30,7 @@ def pengelolaKaryawan_create(request):
         is_staff = request.POST.get('is_staff') == 'on'
         is_superuser = request.POST.get('is_superuser') == 'on'
         gaji_pokok = request.POST.get('gaji_pokok', '0')
+        default_jam_selesai = request.POST.get('default_jam_selesai', '22:00')
         tanggal_bekerja = request.POST.get('tanggal_bekerja', 4)
         
         # Validate password confirmation
@@ -153,6 +155,8 @@ def pengelolaKaryawan_update(request, id):
                     raise ValueError("Salary cannot be negative")
                 
                 gaji.gaji_pokok = gaji_pokok
+                if default_jam_selesai:
+                    gaji.default_jam_selesai = datetime.strptime(default_jam_selesai, '%H:%M').time()
                 gaji.save()
             except ValueError as e:
                 messages.error(request, f'Invalid salary value: {str(e)}')

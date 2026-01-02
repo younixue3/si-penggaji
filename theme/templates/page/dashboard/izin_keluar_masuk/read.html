@@ -46,6 +46,7 @@
             <th class="p-4 text-left font-medium text-gray-600 whitespace-nowrap">Jam Izin Keluar</th>
             <th class="p-4 text-left font-medium text-gray-600 whitespace-nowrap">Jam Izin Masuk</th>
             <th class="p-4 text-left font-medium text-gray-600 whitespace-nowrap">Jam Masuk Kerja</th>
+            <th class="p-4 text-left font-medium text-gray-600 whitespace-nowrap">Jam Selesai Kerja</th>
             <th class="p-4 text-left font-medium text-gray-600 whitespace-nowrap">Pegawai</th>
             <th class="p-4 text-left font-medium text-gray-600 whitespace-nowrap">Upah Bersih</th>
             <th class="p-4 text-left font-medium text-gray-600 whitespace-nowrap">Upah Kotor</th>
@@ -82,8 +83,13 @@
                 <button type="submit" class="hidden">Simpan</button>
               </form>
             </td>
-
-
+            <td class="p-4 text-sm form_dbl_click_disable" data-inline-edit id="form-time-end-{{ izin.id }}">
+              <form action="{% url 'izin_update' pk=izin.id penggajian_id=penggajian_id slip_gaji_id=slip_gaji.id %}" method="POST" class="inline">
+                {% csrf_token %}
+                <input type="time" name="jam_selesai" value="{{ izin.jam_selesai|time:'H:i' }}" class="border rounded px-2 py-1 text-sm bg-transparent" disabled>
+                <button type="submit" class="hidden">Simpan</button>
+              </form>
+            </td>
             <td class="p-4 text-sm">{{ izin.slip_gaji.user.username }}</td>
             <td class="p-4 text-sm">
               <div class="flex items-center">

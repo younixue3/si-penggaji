@@ -226,6 +226,7 @@ class IzinKeluarMasuk(models.Model):
     date = models.DateField(null=True, blank=True)
     time_out = models.TimeField(blank=True, default=time(0, 0))
     time_in = models.TimeField(blank=True, default=time(0, 0))
+    jam_selesai = models.TimeField(null=True, blank=True, default=time(0, 0))
     nilai_izin = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     time_work = models.TimeField(blank=True, default=time(0, 0))
     upah_harian = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -247,7 +248,14 @@ class IzinKeluarMasuk(models.Model):
         # Convert time_work to datetime for comparison
         base_date = datetime.now().date()
         time_work_datetime = datetime.combine(base_date, self.time_work)
-        end_time = datetime.combine(base_date, time(22, 0))  # 22:00
+        
+        # Use jam_selesai if available, otherwise default to 22:00
+        if self.jam_selesai:
+            finish_time = self.jam_selesai
+        else:
+            finish_time = time(22, 0)
+            
+        end_time = datetime.combine(base_date, finish_time)
         
         if time_work_datetime < end_time:
             time_diff = end_time - time_work_datetime
