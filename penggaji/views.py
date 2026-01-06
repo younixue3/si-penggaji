@@ -257,52 +257,58 @@ def izin_update(request, pk, slip_gaji_id, penggajian_id):
 
             if status_off:
                 izin.status_off = status_off
-
             else:
-                # Only validate all fields if more than 2 attributes are present
-                if len(request.POST) > 2 and not all([time_out, time_in, time_work, jam_selesai]):
-                    messages.error(request, "All fields are required")
-                    return render(request, 'page/dashboard/izin_keluar_masuk/update.html', {
-                        'izin': izin,
-                        'slip_gaji': slip_gaji
-                    })
+                # Collect only non-empty time fields
+                time_fields = {
+                    'time_out': time_out,
+                    'time_in': time_in,
+                    'time_work': time_work,
+                    'jam_selesai': jam_selesai
+                }
+                provided_times = {k: v for k, v in time_fields.items() if v}
 
-                # # Ensure time fields are not None before parsing
-                # if not all([time_out, time_in, time_work, jam_selesai]):
-                #     messages.error(request, "Time fields cannot be empty")
-                #     return render(request, 'page/dashboard/izin_keluar_masuk/update.html', {
-                #         'izin': izin,
-                #         'slip_gaji': slip_gaji
-                #     })
+                # If any time field is provided, validate and parse
+                if provided_times:
+                    # Validate provided time fields
+                    parsed_times = {}
+                    for key, value in provided_times.items():
+                        try:
+                            parsed_times[key] = datetime.strptime(value, '%H:%M')
+                        except ValueError:
+                            messages.error(request, f"Invalid time format for {key}. Please use HH:MM format")
+                            return render(request, 'page/dashboard/izin_keluar_masuk/update.html', {
+                                'izin': izin,
+                                'slip_gaji': slip_gaji
+                            })
 
-                try:
-                    time_out_obj = datetime.strptime(time_out, '%H:%M')
-                    time_in_obj = datetime.strptime(time_in, '%H:%M')
-                    time_work_obj = datetime.strptime(time_work, '%H:%M')
-                    jam_selesai_obj = datetime.strptime(jam_selesai, '%H:%M')
-                except ValueError:
-                    messages.error(request, "Invalid time format. Please use HH:MM format")
-                    return render(request, 'page/dashboard/izin_keluar_masuk/update.html', {
-                        'izin': izin,
-                        'slip_gaji': slip_gaji
-                    })
+                    # Additional validation for time_out and time_in if both provided
+                    if 'time_out' in parsed_times and 'time_in' in parsed_times:
+                        if parsed_times['time_in'] <= parsed_times['time_out']:
+                            messages.error(request, "Time in must be after time out")
+                            return render(request, 'page/dashboard/izin_keluar_masuk/update.html', {
+                                'izin': izin,
+                                'slip_gaji': slip_gaji
+                            })
 
-                if time_in_obj <= time_out_obj:
-                    messages.error(request, "Time in must be after time out")
-                    return render(request, 'page/dashboard/izin_keluar_masuk/update.html', {
-                        'izin': izin,
-                        'slip_gaji': slip_gaji
-                    })
+                    # Calculate nilai_izin only if both time_out and time_in provided
+                    if 'time_out' in parsed_times and 'time_in' in parsed_times:
+                        time_diff = parsed_times['time_in'] - parsed_times['time_out']
+                        nilai_izin = time_diff.total_seconds() / 60
+                        izin.nilai_izin = nilai_izin
 
-                time_diff = time_in_obj - time_out_obj
-                nilai_izin = time_diff.total_seconds() / 60
+                    # Assign provided time values to izin
+                    if 'time_out' in parsed_times:
+                        izin.time_out = parsed_times['time_out'].time()
+                    if 'time_in' in parsed_times:
+                        izin.time_in = parsed_times['time_in'].time()
+                    if 'jam_selesai' in parsed_times:
+                        izin.jam_selesai = parsed_times['jam_selesai'].time()
+                    if 'time_work' in parsed_times:
+                        izin.time_work = parsed_times['time_work'].time()
 
-                izin.date = date
-                izin.time_out = time_out_obj.time()
-                izin.time_in = time_in_obj.time()
-                izin.jam_selesai = jam_selesai_obj.time()
-                izin.time_work = time_work_obj.time()
-                izin.nilai_izin = nilai_izin
+                # Always update date and potongan if provided
+                if date:
+                    izin.date = date
                 izin.potongan = potongan
 
             izin.save()
